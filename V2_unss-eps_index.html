@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNSS – Gestion EPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --blue: #1a3a8f;
+  --blue-dark: #122870;
+  --blue-light: #2a52c9;
+  --orange: #f97316;
+  --orange-light: #fb923c;
+  --white: #ffffff;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --yellow: #d97706;
+  --yellow-light: #fef3c7;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(26,58,143,0.10);
+  --shadow-lg: 0 8px 32px rgba(26,58,143,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--blue);
+  color: white;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+
+.logo { display: flex; flex-direction: column; line-height: 1; }
+.logo-text { font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px; }
+.logo-text span { color: var(--orange); }
+.logo-sub { font-size: 10px; color: rgba(255,255,255,0.65); font-weight: 400; letter-spacing: 0.5px; }
+
+.header-actions { display: flex; gap: 10px; align-items: center; }
+
+/* ── NAV ── */
+nav {
+  background: var(--blue-dark);
+  display: flex;
+  overflow-x: auto;
+  padding: 0 24px;
+  gap: 2px;
+  border-bottom: 3px solid var(--orange);
+}
+
+nav::-webkit-scrollbar { height: 3px; }
+
+nav button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.70);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 14px 18px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -3px;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+nav button:hover { color: white; background: rgba(255,255,255,0.07); }
+nav button.active { color: white; font-weight: 700; border-bottom: 3px solid var(--orange); }
+
+/* ── MAIN ── */
+main { padding: 28px 24px; max-width: 1300px; margin: 0 auto; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── SECTION TITLE ── */
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--blue);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-title::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 28px;
+  background: var(--orange);
+  border-radius: 3px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── FORMS ── */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.6px; }
+
+input, select, textarea {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  padding: 9px 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 7px;
+  background: white;
+  color: var(--gray-800);
+  transition: border-color .15s;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(42,82,201,0.1); }
+input[type="number"] { text-align: center; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-orange { background: var(--orange); color: white; }
+.btn-orange:hover { background: var(--orange-light); }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #15803d; }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-outline { background: white; color: var(--blue); border: 1.5px solid var(--blue); }
+.btn-outline:hover { background: var(--blue); color: white; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 9px; font-size: 11px; }
+.btn-gray { background: var(--gray-200); color: var(--gray-700); }
+.btn-gray:hover { background: var(--gray-300); }
+
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+
+/* ── TABLES ── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1.5px solid var(--gray-200); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--blue);
+  color: white;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child { border-radius: 0 8px 0 0; }
+
+tbody tr { transition: background .1s; }
+tbody tr:hover { background: var(--gray-50); }
+tbody tr:nth-child(even) { background: var(--gray-50); }
+tbody tr:nth-child(even):hover { background: var(--gray-100); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+
+.rank-1 { background: #fef9c3 !important; font-weight: 700; }
+.rank-2 { background: #f1f5f9 !important; }
+.rank-3 { background: #fef3c7 !important; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.badge-blue { background: #dbeafe; color: var(--blue); }
+.badge-orange { background: #fed7aa; color: #9a3412; }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-gray { background: var(--gray-200); color: var(--gray-600); }
+.badge-yellow { background: var(--yellow-light); color: var(--yellow); }
+
+/* ── ALERT ── */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 14px;
+  border-left: 4px solid;
+}
+.alert-info { background: #dbeafe; border-color: var(--blue); color: var(--blue-dark); }
+.alert-success { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.alert-warning { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow); }
+
+/* ── TABS ── */
+.tab-bar { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 2px solid var(--gray-200); }
+.tab-bar button {
+  background: none;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-400);
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all .15s;
+}
+.tab-bar button.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-bar button:hover:not(.active) { color: var(--gray-700); }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── STUDENT LIST MANAGER ── */
+.student-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 40px; }
+.chip {
+  background: var(--blue);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip button { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; line-height: 1; padding: 0; }
+.chip button:hover { color: white; }
+
+/* ── MATCH SCORE INPUT ── */
+.match-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.match-score input { width: 52px; text-align: center; font-size: 15px; font-weight: 700; }
+.score-sep { font-size: 18px; font-weight: 800; color: var(--gray-400); }
+
+/* ── BRACKET ── */
+.bracket-wrap { overflow-x: auto; padding: 10px 0; }
+.bracket { display: flex; gap: 0; }
+.bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 180px; }
+.bracket-round-title { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; margin-bottom: 10px; padding: 6px; background: var(--gray-100); border-radius: 6px; margin-right: 10px; }
+.bracket-match { margin: 6px 10px 6px 0; border: 1.5px solid var(--gray-200); border-radius: 8px; overflow: hidden; background: white; box-shadow: var(--shadow); }
+.bracket-slot { padding: 8px 12px; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 160px; }
+.bracket-slot:first-child { border-bottom: 1px solid var(--gray-200); }
+.bracket-slot.winner { background: var(--green-light); color: var(--green); }
+.bracket-slot .slot-score { font-size: 14px; font-weight: 800; min-width: 22px; text-align: center; }
+.bracket-slot .slot-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── GRID HELPERS ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── TERRAIN DIAGRAM ── */
+.terrain { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.terrain-half {
+  width: 100%;
+  max-width: 240px;
+  position: relative;
+  border: 2.5px solid var(--blue-dark);
+  background: #e0f2fe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.terrain-net { width: 100%; max-width: 240px; height: 8px; background: var(--gray-800); border-radius: 2px; }
+.terrain-zone { width: 100%; text-align: center; font-size: 10px; font-weight: 700; padding: 6px 0; letter-spacing: 0.3px; }
+.terrain-river { background: #bfdbfe; border: 1px dashed var(--blue); }
+.terrain-mid { background: #7dd3fc; }
+.terrain-back { background: #38bdf8; }
+
+/* ── SCORE DISPLAY ── */
+.score-big { font-size: 32px; font-weight: 800; font-family: 'Space Mono', monospace; }
+.score-vs { font-size: 16px; color: var(--gray-400); padding: 0 12px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal-title { font-size: 18px; font-weight: 800; color: var(--blue); margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── POULE GRID ── */
+.poules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.poule-card { background: white; border-radius: var(--radius); border: 2px solid var(--gray-200); overflow: hidden; }
+.poule-header { background: var(--blue); color: white; padding: 10px 14px; font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.poule-body { padding: 12px 14px; }
+.poule-player { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+.poule-player:last-child { border-bottom: none; }
+.poule-player-num { width: 22px; height: 22px; border-radius: 50%; background: var(--blue); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ── MATCH SCHEDULE ── */
+.match-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+.match-item:last-child { border-bottom: none; }
+.match-players { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.match-vs { color: var(--gray-400); font-size: 11px; font-weight: 700; }
+.match-num { width: 28px; height: 28px; border-radius: 50%; background: var(--orange); color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* ── CLASSEMENT ── */
+.classement-row { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-bottom: 1px solid var(--gray-100); }
+.classement-row:last-child { border-bottom: none; }
+.rank-badge { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.rank-gold { background: #fbbf24; color: white; }
+.rank-silver { background: var(--gray-300); color: white; }
+.rank-bronze { background: #d97706; color: white; }
+.rank-other { background: var(--gray-200); color: var(--gray-600); }
+
+/* ── LIGUE ── */
+.ligue-match-card { background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 9px; padding: 12px 16px; margin-bottom: 10px; }
+.ligue-match-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ligue-match-players { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ligue-player-name { font-weight: 700; font-size: 14px; flex: 1; text-align: center; }
+
+/* ── DEFI ── */
+.defi-classement .classement-row { cursor: pointer; }
+.defi-classement .classement-row:hover { background: var(--gray-50); }
+
+/* ── SPINNER ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+
+/* ── PRINT ── */
+@media print { header, nav { display: none; } }
+
+/* ── THEME POWER MOTEUR ── */
+.pm-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  background: #fef3c7; color: #92400e;
+  border: 1.5px solid #fcd34d;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-text"><span>UN</span>SS</div>
+    <div class="logo-sub">Gestion EPS</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline" id="btnExportGlobal" style="color:white;border-color:rgba(255,255,255,0.4);" onclick="exportGlobalPDF()">
+      📄 Export Global PDF
+    </button>
+  </div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showPage('home',this)">🏠 Accueil</button>
+  <button onclick="showPage('partenaire',this)">🤝 Partenaire en Or</button>
+  <button onclick="showPage('poules',this)">⚽ Poules</button>
+  <button onclick="showPage('defi',this)">⚔️ Défi</button>
+  <button onclick="showPage('match-theme',this)">🎯 Match à Thème</button>
+  <button onclick="showPage('ligue-ind',this)">🏅 Ligue Individuelle</button>
+  <button onclick="showPage('ligue-col',this)">👥 Ligue Collective</button>
+  <button onclick="showPage('tournoi',this)">🏆 Tournoi</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     PAGE : ACCUEIL / CONFIG CLASSE
+══════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="page-title">Configuration de la Classe</div>
+
+  <div class="card">
+    <div class="card-title">📋 Informations de la séance</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Classe</label>
+        <input type="text" id="cfg-classe" placeholder="Ex: 3ème B" oninput="saveConfig()">
+      </div>
+      <div class="form-group">
+        <label>Enseignant</label>
+        <input type="text" id="cfg-enseignant" placeholder="Nom de l'enseignant" oninput="saveConfig()">
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="cfg-date" oninput="saveConfig()">
+      </div>
+      <div class="form-group">
+        <label>Sport / Discipline</label>
+        <input type="text" id="cfg-sport" placeholder="Ex: Badminton" value="Badminton" oninput="saveConfig()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Liste des élèves</div>
+    <div class="alert alert-info">Saisissez les élèves ici — ils seront disponibles dans toutes les situations.</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label>Prénom</label>
+        <input type="text" id="s-prenom" placeholder="Prénom" onkeydown="if(event.key==='Enter')addStudent()">
+      </div>
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label>Nom</label>
+        <input type="text" id="s-nom" placeholder="Nom" onkeydown="if(event.key==='Enter')addStudent()">
+      </div>
+      <button class="btn btn-primary" onclick="addStudent()">+ Ajouter</button>
+      <button class="btn btn-gray btn-sm" onclick="importSampleStudents()">🎲 Exemple</button>
+    </div>
+    <div class="student-chips" id="student-list"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+      <span id="student-count" class="badge badge-blue">0 élève(s)</span>
+      <button class="btn btn-sm btn-gray" onclick="clearStudents()">🗑️ Tout supprimer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📥 Historique des séances</div>
+    <div id="historique-list">
+      <p style="color:var(--gray-400);font-size:13px;">Aucune séance enregistrée. Les résultats apparaîtront ici après chaque situation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : PARTENAIRE EN OR
+══════════════════════════════════════════ -->
+<div class="page" id="page-partenaire">
+  <div class="page-title">🤝 Partenaire en Or</div>
+
+  <div class="card" id="peo-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre d'échanges à réaliser</label>
+        <input type="number" id="peo-echanges" value="10" min="1">
+      </div>
+      <div class="form-group">
+        <label>Durée max (minutes, 0=illimitée)</label>
+        <input type="number" id="peo-duree" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Points si réussite</label>
+        <input type="number" id="peo-pts-win" value="10" min="1">
+      </div>
+      <div class="form-group">
+        <label>Points si échec</label>
+        <input type="number" id="peo-pts-lose" value="1" min="0">
+      </div>
+      <div class="form-group">
+        <label>Date de la séance</label>
+        <input type="date" id="peo-date">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="startPartenaire()">▶ Démarrer la situation</button>
+    </div>
+  </div>
+
+  <div id="peo-game" style="display:none">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">⏱️ Chrono <span id="peo-timer-badge" class="badge badge-orange" style="display:none"></span></div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div class="score-big" id="peo-timer-display">00:00</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success" id="peo-btn-start" onclick="togglePEOTimer()">▶ Démarrer</button>
+            <button class="btn btn-gray" onclick="resetPEOTimer()">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Progression</div>
+        <div style="font-size:13px;color:var(--gray-600);" id="peo-progress-text">Sélectionnez un match pour saisir le résultat.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎾 Matchs à réaliser</div>
+      <div id="peo-matches"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏆 Classement</div>
+      <div id="peo-classement"></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportPEOPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="savePEOHistorique()">💾 Sauvegarder en historique</button>
+      <button class="btn btn-outline" onclick="resetPartenaire()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : POULES
+══════════════════════════════════════════ -->
+<div class="page" id="page-poules">
+  <div class="page-title">⚽ Poules</div>
+
+  <div class="card" id="poules-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Répartition</label>
+        <select id="poules-repartition">
+          <option value="manuel">Manuelle</option>
+          <option value="homogene">Homogène</option>
+          <option value="heterogene">Hétérogène</option>
+          <option value="aleatoire">Aléatoire</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Élèves par poule (3-4)</label>
+        <input type="number" id="poules-size" value="4" min="3" max="4">
+      </div>
+      <div class="form-group">
+        <label>Points par victoire</label>
+        <input type="number" id="poules-pts-win" value="3" min="1">
+      </div>
+      <div class="form-group">
+        <label>Points par défaite</label>
+        <input type="number" id="poules-pts-lose" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Points pour gagner un set</label>
+        <input type="number" id="poules-pts-set" value="11" min="1">
+      </div>
+      <div class="form-group">
+        <label>Type de poules</label>
+        <select id="poules-type">
+          <option value="classique">Classique (classement par poule)</option>
+          <option value="montante">Homogène montante/descendante</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="poules-source-peo-wrap" style="margin-top:12px;">
+      <label>Source du classement (si homogène)</label>
+      <select id="poules-source">
+        <option value="aucun">Ordre de saisie</option>
+        <option value="peo">Partenaire en Or</option>
+        <option value="manuel">Manuel (glisser-déposer)</option>
+      </select>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="genererPoules()">⚙️ Générer les poules</button>
+    </div>
+  </div>
+
+  <!-- Ajustement manuel -->
+  <div id="poules-adjust" style="display:none">
+    <div class="card">
+      <div class="card-title">✏️ Ajustement des poules <span class="badge badge-orange">Avant démarrage</span></div>
+      <div id="poules-adjust-content"></div>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="confirmerPoules()">✅ Confirmer et démarrer</button>
+        <button class="btn btn-gray" onclick="regenPoules()">🔄 Regénérer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jeu -->
+  <div id="poules-game" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 Matchs programmés <span class="badge badge-blue" id="poules-match-count"></span></div>
+      <div id="poules-matches-list"></div>
+    </div>
+    <div id="poules-cards-wrap" class="poules-grid"></div>
+    <div class="card">
+      <div class="card-title">🏆 Classement par poule</div>
+      <div id="poules-classement"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportPoulesPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="resetPoules()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : DÉFI
+══════════════════════════════════════════ -->
+<div class="page" id="page-defi">
+  <div class="page-title">⚔️ Défi</div>
+
+  <div class="card" id="defi-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre de tableaux</label>
+        <select id="defi-nb-tableaux">
+          <option value="1">1 tableau</option>
+          <option value="2">2 tableaux</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Répartition initiale</label>
+        <select id="defi-repartition">
+          <option value="manuel">Manuelle</option>
+          <option value="homogene">Homogène</option>
+          <option value="heterogene">Hétérogène</option>
+          <option value="aleatoire">Aléatoire</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Refus de défi autorisé</label>
+        <select id="defi-refus">
+          <option value="non">Non</option>
+          <option value="oui">Oui</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nb max de défis par séance</label>
+        <input type="number" id="defi-max-matchs" value="5" min="1">
+      </div>
+      <div class="form-group">
+        <label>Écart min de rang pour défier</label>
+        <input type="number" id="defi-ecart-min" value="1" min="1" max="5">
+      </div>
+      <div class="form-group">
+        <label>Écart max de rang pour défier</label>
+        <input type="number" id="defi-ecart-max" value="3" min="1" max="10">
+      </div>
+      <div class="form-group">
+        <label>Capital de points de départ (1er)</label>
+        <input type="number" id="defi-capital-max" value="1000" min="100" step="50">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="startDefi()">▶ Démarrer le Défi</button>
+    </div>
+  </div>
+
+  <div id="defi-game" style="display:none">
+    <div class="grid-2">
+      <div class="card defi-classement">
+        <div class="card-title">📊 Classement <span id="defi-tableau-1-label" class="badge badge-blue">Tableau 1</span></div>
+        <div id="defi-classement-1"></div>
+      </div>
+      <div class="card defi-classement" id="defi-tableau-2-card" style="display:none">
+        <div class="card-title">📊 Classement <span class="badge badge-orange">Tableau 2</span></div>
+        <div id="defi-classement-2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚔️ Enregistrer un Défi</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tableau</label>
+          <select id="defi-select-tableau">
+            <option value="1">Tableau 1</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Challenger (qui défie)</label>
+          <select id="defi-challenger"></select>
+        </div>
+        <div class="form-group">
+          <label>Défenseur (défié)</label>
+          <select id="defi-defenseur"></select>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="proposeDefi()">⚔️ Proposer ce défi</button>
+      </div>
+      <div id="defi-pending" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📜 Historique des défis</div>
+      <div id="defi-historique"></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportDefiPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="resetDefi()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : MATCH À THÈME
+══════════════════════════════════════════ -->
+<div class="page" id="page-match-theme">
+  <div class="page-title">🎯 Match à Thème</div>
+
+  <div class="card" id="mt-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Format</label>
+        <select id="mt-format">
+          <option value="roundrobin">Chacun contre chacun (Round Robin)</option>
+          <option value="poules">Par poules</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Pouvoir moteur (bonus)</label>
+        <select id="mt-pouvoir" onchange="updateTerrainDiagram()">
+          <option value="">Aucun</option>
+          <option value="lateral">Espaces latéraux</option>
+          <option value="horizontal">Espaces horizontaux</option>
+          <option value="amorti">Amorti</option>
+          <option value="kill">Kill</option>
+          <option value="smash">Smash</option>
+          <option value="contre-amorti">Contre-amorti</option>
+          <option value="bingo">Bingo</option>
+          <option value="autre">Autre (personnalisé)</option>
+        </select>
+      </div>
+      <div class="form-group" id="mt-custom-wrap" style="display:none">
+        <label>Description du bonus</label>
+        <input type="text" id="mt-custom-desc" placeholder="Décrivez le pouvoir moteur...">
+      </div>
+      <div class="form-group">
+        <label>Points bonus si réalisé</label>
+        <input type="number" id="mt-pts-bonus" value="2" min="1">
+      </div>
+      <div class="form-group">
+        <label>Points pour gagner un set</label>
+        <input type="number" id="mt-pts-set" value="11" min="1">
+      </div>
+      <div class="form-group">
+        <label>Points par poule (si format poules)</label>
+        <input type="number" id="mt-poule-size" value="4" min="3" max="4">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="startMatchTheme()">▶ Démarrer</button>
+    </div>
+  </div>
+
+  <!-- Diagramme terrain -->
+  <div class="card" id="mt-terrain-card" style="display:none">
+    <div class="card-title">🏸 Schéma du terrain</div>
+    <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+      <div id="mt-terrain-diagram"></div>
+      <div id="mt-terrain-explication" style="flex:1;min-width:200px;font-size:13px;color:var(--gray-700);line-height:1.6;"></div>
+    </div>
+  </div>
+
+  <div id="mt-game" style="display:none">
+    <div class="card">
+      <div class="card-title">🎾 Matchs <span id="mt-pm-badge" class="pm-badge" style="display:none"></span></div>
+      <div id="mt-matches"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Classement</div>
+      <div id="mt-classement"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportMTPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="resetMatchTheme()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : LIGUE INDIVIDUELLE
+══════════════════════════════════════════ -->
+<div class="page" id="page-ligue-ind">
+  <div class="page-title">🏅 Ligue Individuelle</div>
+
+  <div id="li-sessions">
+    <div class="card">
+      <div class="card-title">📅 Sessions de ligue</div>
+      <div id="li-sessions-list"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="openAddLISession()">+ Nouvelle session</button>
+      </div>
+    </div>
+
+    <div id="li-config-wrap">
+      <div class="card">
+        <div class="card-title">⚙️ Configuration de la ligue</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Source des ligues</label>
+            <select id="li-source">
+              <option value="aleatoire">Aléatoire</option>
+              <option value="peo">Depuis Partenaire en Or</option>
+              <option value="manuel">Manuel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nombre de ligues</label>
+            <select id="li-nb-ligues">
+              <option value="1">1 ligue</option>
+              <option value="2">2 ligues</option>
+              <option value="3">3 ligues</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Points pour gagner un set</label>
+            <input type="number" id="li-pts-set" value="11" min="1">
+          </div>
+          <div class="form-group">
+            <label>Système de points</label>
+            <select id="li-pts-system">
+              <option value="fixe">Fixe (V=4, D=1)</option>
+              <option value="ecart">Selon l'écart</option>
+            </select>
+          </div>
+          <div class="form-group" id="li-pts-fixe-wrap">
+            <label>Points / Victoire</label>
+            <input type="number" id="li-pts-win" value="4" min="1">
+          </div>
+          <div class="form-group" id="li-pts-fixe-lose-wrap">
+            <label>Points / Défaite</label>
+            <input type="number" id="li-pts-lose" value="1" min="0">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="startLigueInd()">▶ Créer la ligue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="li-game" style="display:none">
+    <div class="tab-bar" id="li-tab-bar"></div>
+    <div id="li-tab-content"></div>
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportLIGPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-primary" onclick="addLISession()">+ Ajouter une session</button>
+      <button class="btn btn-gray" onclick="resetLigueInd()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : LIGUE COLLECTIVE
+══════════════════════════════════════════ -->
+<div class="page" id="page-ligue-col">
+  <div class="page-title">👥 Ligue Collective</div>
+
+  <div class="card" id="lc-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Format de match</label>
+        <select id="lc-format">
+          <option value="1">Format 1 — Addition des 2 matchs</option>
+          <option value="2">Format 2 — Score cumulé (J1→J2→Doublette)</option>
+          <option value="3">Format 3 — Score cumulé puis doublette</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Points pour gagner le set</label>
+        <input type="number" id="lc-pts-set" value="11" min="1">
+      </div>
+      <div class="form-group">
+        <label>Ordre du premier match</label>
+        <select id="lc-ordre">
+          <option value="j1j1">J1 vs J1 d'abord</option>
+          <option value="tirage">Tirage au sort</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>En cas d'égalité (Format 1)</label>
+        <select id="lc-egalite">
+          <option value="tirage">Tirage au sort (5 pts)</option>
+          <option value="bonus">Équipe avec le plus de bonus</option>
+        </select>
+      </div>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px;">Les binômes seront formés automatiquement à partir des élèves de la classe. Vous pourrez les ajuster.</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="startLigueCol()">▶ Créer les binômes</button>
+    </div>
+  </div>
+
+  <div id="lc-game" style="display:none">
+    <div class="card">
+      <div class="card-title">👥 Binômes</div>
+      <div id="lc-binomes"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎾 Matchs</div>
+      <div id="lc-matches"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Classement</div>
+      <div id="lc-classement"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportLCPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="resetLigueCol()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE : TOURNOI
+══════════════════════════════════════════ -->
+<div class="page" id="page-tournoi">
+  <div class="page-title">🏆 Tournoi (Poules + Tableau)</div>
+
+  <div class="card" id="tournoi-config-card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Répartition des poules</label>
+        <select id="tournoi-repartition">
+          <option value="manuel">Manuelle</option>
+          <option value="heterogene">Hétérogène</option>
+          <option value="aleatoire">Aléatoire</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Élèves par poule (3-4)</label>
+        <input type="number" id="tournoi-size" value="4" min="3" max="4">
+      </div>
+      <div class="form-group">
+        <label>Points pour gagner un set</label>
+        <input type="number" id="tournoi-pts-set" value="11" min="1">
+      </div>
+      <div class="form-group">
+        <label>Points par victoire (poule)</label>
+        <input type="number" id="tournoi-pts-win" value="3" min="1">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="genererTournoi()">⚙️ Générer les poules</button>
+    </div>
+  </div>
+
+  <!-- Ajustement -->
+  <div id="tournoi-adjust" style="display:none">
+    <div class="card">
+      <div class="card-title">✏️ Ajustement des poules</div>
+      <div id="tournoi-adjust-content"></div>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="demarrerTournoi()">✅ Valider et démarrer</button>
+        <button class="btn btn-gray" onclick="regenTournoi()">🔄 Regénérer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase de poules -->
+  <div id="tournoi-poules-game" style="display:none">
+    <div class="tab-bar">
+      <button class="active" onclick="switchTournoiTab('poules',this)">⚽ Phase de Poules</button>
+      <button onclick="switchTournoiTab('tableau',this)">🏆 Tableau Final</button>
+      <button onclick="switchTournoiTab('classement',this)">📊 Classement Général</button>
+    </div>
+
+    <div id="tournoi-tab-poules">
+      <div class="card">
+        <div class="card-title">📋 Matchs programmés</div>
+        <div id="tournoi-matches-list"></div>
+      </div>
+      <div id="tournoi-poules-cards" class="poules-grid"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="genererTableau()">🏆 Générer le Tableau Final</button>
+      </div>
+    </div>
+
+    <div id="tournoi-tab-tableau" style="display:none">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🥇 Tableau Principal</div>
+          <div class="bracket-wrap" id="bracket-principal"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🥈 Tableau de Consolation</div>
+          <div class="bracket-wrap" id="bracket-consolation"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tournoi-tab-classement" style="display:none">
+      <div class="card">
+        <div class="card-title">🏆 Classement Général</div>
+        <div id="tournoi-classement-general"></div>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-orange" onclick="exportTournoiPDF()">📄 Exporter PDF</button>
+      <button class="btn btn-gray" onclick="resetTournoi()">↺ Recommencer</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     MODAL GÉNÉRIQUE
+══════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal" id="modal-content">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE GLOBAL
+// ══════════════════════════════════════════════════════
+const APP = {
+  students: [],       // [{id, prenom, nom}]
+  config: {},
+  historique: [],
+
+  // Partenaire en Or
+  peo: { running: false, echanges: 10, matches: [], scores: {}, timer: 0, timerInt: null },
+
+  // Poules
+  poules: { poules: [], matches: [], running: false },
+
+  // Défi
+  defi: { running: false, tableaux: [{players:[], history:[]}], pending: null },
+
+  // Match à thème
+  mt: { running: false, matches: [], scores: {}, pouvoir: '' },
+
+  // Ligue individuelle
+  li: { running: false, ligues: [], sessions: [], currentSession: 0 },
+
+  // Ligue collective
+  lc: { running: false, binomes: [], matches: [] },
+
+  // Tournoi
+  tournoi: { running: false, poules: [], matches: [], bracket: { principal: [], consolation: [] } }
+};
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════════
+function showModal(title, bodyHTML, actions = []) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  const acts = document.getElementById('modal-actions');
+  acts.innerHTML = '';
+  actions.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + (a.cls || 'btn-primary');
+    b.textContent = a.label;
+    b.onclick = a.fn;
+    acts.appendChild(b);
+  });
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ══════════════════════════════════════════════════════
+//  STUDENTS
+// ══════════════════════════════════════════════════════
+function addStudent() {
+  const p = document.getElementById('s-prenom').value.trim();
+  const n = document.getElementById('s-nom').value.trim();
+  if (!p && !n) return;
+  const id = Date.now() + Math.random();
+  APP.students.push({ id, prenom: p, nom: n });
+  document.getElementById('s-prenom').value = '';
+  document.getElementById('s-nom').value = '';
+  document.getElementById('s-prenom').focus();
+  renderStudents();
+}
+
+function removeStudent(id) {
+  APP.students = APP.students.filter(s => s.id !== id);
+  renderStudents();
+}
+
+function renderStudents() {
+  const el = document.getElementById('student-list');
+  el.innerHTML = APP.students.map(s =>
+    `<div class="chip">${s.prenom} ${s.nom}<button onclick="removeStudent(${s.id})">✕</button></div>`
+  ).join('');
+  document.getElementById('student-count').textContent = APP.students.length + ' élève(s)';
+}
+
+function clearStudents() {
+  if (confirm('Supprimer tous les élèves ?')) { APP.students = []; renderStudents(); }
+}
+
+function importSampleStudents() {
+  const sample = [
+    ['Alice','Martin'],['Baptiste','Durand'],['Chloé','Bernard'],['Dylan','Thomas'],
+    ['Emma','Robert'],['Florian','Petit'],['Gabrielle','Richard'],['Hugo','Simon'],
+    ['Inès','Laurent'],['Jules','Michel'],['Lena','Lefevre'],['Maxime','Moreau']
+  ];
+  APP.students = sample.map(([p,n],i) => ({ id: i+1, prenom: p, nom: n }));
+  renderStudents();
+}
+
+function saveConfig() {
+  APP.config.classe = document.getElementById('cfg-classe').value;
+  APP.config.enseignant = document.getElementById('cfg-enseignant').value;
+  APP.config.date = document.getElementById('cfg-date').value;
+  APP.config.sport = document.getElementById('cfg-sport').value;
+}
+
+function studentName(s) { return s.prenom + ' ' + s.nom; }
+function getStudents() { return APP.students; }
+
+// ══════════════════════════════════════════════════════
+//  HELPER FUNCTIONS
+// ══════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generateRoundRobin(players) {
+  const matches = [];
+  for (let i = 0; i < players.length; i++)
+    for (let j = i + 1; j < players.length; j++)
+      matches.push({ p1: players[i], p2: players[j], s1: null, s2: null, played: false });
+  return matches;
+}
+
+function sortByPoints(standings) {
+  return [...standings].sort((a,b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.gagnés !== a.gagnés) return b.gagnés - a.gagnés;
+    return (b.ptsMark - b.ptsConc) - (a.ptsMark - a.ptsConc);
+  });
+}
+
+function rankBadge(r) {
+  const cls = r===1?'rank-gold':r===2?'rank-silver':r===3?'rank-bronze':'rank-other';
+  const icon = r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
+  return `<div class="rank-badge ${cls}">${icon}</div>`;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('fr-FR');
+}
+
+// ══════════════════════════════════════════════════════
+//  PARTENAIRE EN OR
+// ══════════════════════════════════════════════════════
+function startPartenaire() {
+  const students = getStudents();
+  if (students.length < 2) { alert('Minimum 2 élèves requis.'); return; }
+
+  APP.peo.echanges = parseInt(document.getElementById('peo-echanges').value);
+  APP.peo.ptsWin = parseInt(document.getElementById('peo-pts-win').value);
+  APP.peo.ptsLose = parseInt(document.getElementById('peo-pts-lose').value);
+  APP.peo.duree = parseInt(document.getElementById('peo-duree').value);
+  APP.peo.matches = [];
+  APP.peo.scores = {};
+  APP.peo.timer = 0;
+  APP.peo.running = false;
+
+  students.forEach(s => { APP.peo.scores[s.id] = 0; });
+
+  // Generate all pairs
+  for (let i = 0; i < students.length; i++)
+    for (let j = i+1; j < students.length; j++)
+      APP.peo.matches.push({ p1: students[i], p2: students[j], result: null, played: false });
+
+  document.getElementById('peo-config-card').style.display = 'none';
+  document.getElementById('peo-game').style.display = 'block';
+  renderPEOMatches();
+  renderPEOClassement();
+}
+
+function renderPEOMatches() {
+  const el = document.getElementById('peo-matches');
+  const played = APP.peo.matches.filter(m => m.played).length;
+  const total = APP.peo.matches.length;
+  document.getElementById('peo-progress-text').innerHTML =
+    `<b>${played}/${total}</b> matchs réalisés &nbsp;|&nbsp; Échanges à réaliser : <b>${APP.peo.echanges}</b>`;
+
+  el.innerHTML = APP.peo.matches.map((m, i) => {
+    const statusBadge = m.played
+      ? `<span class="badge ${m.result?'badge-green':'badge-red'}">${m.result?'✅ Réussi':'❌ Échec'}</span>`
+      : `<span class="badge badge-gray">En attente</span>`;
+    return `<div class="match-item">
+      <div class="match-num">${i+1}</div>
+      <div class="match-players">
+        <span>${m.p1.prenom} ${m.p1.nom}</span>
+        <span class="match-vs">VS</span>
+        <span>${m.p2.prenom} ${m.p2.nom}</span>
+      </div>
+      ${statusBadge}
+      ${!m.played ? `<div style="display:flex;gap:6px;">
+        <button class="btn btn-xs btn-success" onclick="setPEOResult(${i},true)">✅ Réussi</button>
+        <button class="btn btn-xs btn-danger" onclick="setPEOResult(${i},false)">❌ Échec</button>
+      </div>` : `<button class="btn btn-xs btn-gray" onclick="undoPEOResult(${i})">↩</button>`}
+    </div>`;
+  }).join('');
+}
+
+function setPEOResult(i, success) {
+  const m = APP.peo.matches[i];
+  if (m.played) return;
+  m.played = true;
+  m.result = success;
+  const pts = success ? APP.peo.ptsWin : APP.peo.ptsLose;
+  APP.peo.scores[m.p1.id] = (APP.peo.scores[m.p1.id] || 0) + pts;
+  APP.peo.scores[m.p2.id] = (APP.peo.scores[m.p2.id] || 0) + pts;
+  renderPEOMatches();
+  renderPEOClassement();
+}
+
+function undoPEOResult(i) {
+  const m = APP.peo.matches[i];
+  if (!m.played) return;
+  const pts = m.result ? APP.peo.ptsWin : APP.peo.ptsLose;
+  APP.peo.scores[m.p1.id] -= pts;
+  APP.peo.scores[m.p2.id] -= pts;
+  m.played = false;
+  m.result = null;
+  renderPEOMatches();
+  renderPEOClassement();
+}
+
+function renderPEOClassement() {
+  const students = getStudents();
+  const sorted = [...students].sort((a,b) => (APP.peo.scores[b.id]||0) - (APP.peo.scores[a.id]||0));
+  const el = document.getElementById('peo-classement');
+  el.innerHTML = sorted.map((s, i) => `
+    <div class="classement-row">
+      ${rankBadge(i+1)}
+      <div style="flex:1;font-weight:600;">${s.prenom} ${s.nom}</div>
+      <span class="badge badge-blue">${APP.peo.scores[s.id]||0} pts</span>
+    </div>`).join('');
+  // Store for use in other modules
+  APP.peoClassement = sorted.map(s => ({ ...s, pts: APP.peo.scores[s.id]||0 }));
+}
+
+// PEO Timer
+function togglePEOTimer() {
+  if (APP.peo.timerInt) {
+    clearInterval(APP.peo.timerInt);
+    APP.peo.timerInt = null;
+    document.getElementById('peo-btn-start').textContent = '▶ Reprendre';
+  } else {
+    APP.peo.timerInt = setInterval(() => {
+      APP.peo.timer++;
+      updatePEOTimerDisplay();
+      if (APP.peo.duree > 0 && APP.peo.timer >= APP.peo.duree * 60) {
+        clearInterval(APP.peo.timerInt);
+        APP.peo.timerInt = null;
+        document.getElementById('peo-timer-badge').style.display = '';
+        document.getElementById('peo-timer-badge').textContent = 'TEMPS ÉCOULÉ';
+        alert('⏱️ Temps écoulé ! La situation Partenaire en Or est terminée.');
+      }
+    }, 1000);
+    document.getElementById('peo-btn-start').textContent = '⏸ Pause';
+  }
+}
+
+function updatePEOTimerDisplay() {
+  const t = APP.peo.timer;
+  const m = String(Math.floor(t/60)).padStart(2,'0');
+  const s = String(t%60).padStart(2,'0');
+  document.getElementById('peo-timer-display').textContent = `${m}:${s}`;
+}
+
+function resetPEOTimer() {
+  if (APP.peo.timerInt) { clearInterval(APP.peo.timerInt); APP.peo.timerInt = null; }
+  APP.peo.timer = 0;
+  updatePEOTimerDisplay();
+  document.getElementById('peo-btn-start').textContent = '▶ Démarrer';
+}
+
+function resetPartenaire() {
+  if (!confirm('Recommencer la situation Partenaire en Or ?')) return;
+  resetPEOTimer();
+  document.getElementById('peo-config-card').style.display = '';
+  document.getElementById('peo-game').style.display = 'none';
+}
+
+function savePEOHistorique() {
+  const entry = {
+    type: 'Partenaire en Or',
+    date: document.getElementById('peo-date').value || new Date().toISOString().slice(0,10),
+    classement: APP.peoClassement || [],
+    matches: APP.peo.matches.length,
+    echanges: APP.peo.echanges
+  };
+  APP.historique.push(entry);
+  renderHistorique();
+  alert('✅ Sauvegardé dans l\'historique !');
+}
+
+function renderHistorique() {
+  const el = document.getElementById('historique-list');
+  if (!APP.historique.length) {
+    el.innerHTML = '<p style="color:var(--gray-400);font-size:13px;">Aucune séance enregistrée.</p>';
+    return;
+  }
+  el.innerHTML = APP.historique.map((h, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);">
+      <span class="badge badge-blue">${h.type}</span>
+      <span style="font-size:13px;font-weight:600;">${formatDate(h.date)}</span>
+      <span style="font-size:12px;color:var(--gray-600);">${h.matches || ''} matchs</span>
+      <button class="btn btn-xs btn-gray" onclick="APP.historique.splice(${i},1);renderHistorique()">🗑️</button>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  POULES
+// ══════════════════════════════════════════════════════
+function repartirEnPoules(students, size, mode) {
+  let ordered;
+  if (mode === 'aleatoire') ordered = shuffle(students);
+  else if (mode === 'homogene') {
+    // Use PEO scores if available, else order by index
+    ordered = APP.peoClassement ? [...APP.peoClassement] : [...students];
+  } else if (mode === 'heterogene') {
+    // Serpentine distribution
+    const base = APP.peoClassement ? [...APP.peoClassement] : [...students];
+    ordered = base; // will be distributed serpentine below
+  } else {
+    ordered = [...students];
+  }
+
+  const poules = [];
+  const nbPoules = Math.ceil(ordered.length / size);
+  for (let i = 0; i < nbPoules; i++) poules.push([]);
+
+  if (mode === 'heterogene') {
+    // Serpentine: 1→n, n→1, 1→n...
+    ordered.forEach((s, i) => {
+      const row = Math.floor(i / nbPoules);
+      const col = row % 2 === 0 ? (i % nbPoules) : (nbPoules - 1 - (i % nbPoules));
+      poules[col].push(s);
+    });
+  } else {
+    ordered.forEach((s, i) => poules[i % nbPoules].push(s));
+  }
+
+  return poules.filter(p => p.length > 0);
+}
+
+function genMatchRotation(players) {
+  // Round-robin with rest optimization
+  const n = players.length;
+  const matches = generateRoundRobin(players);
+
+  // Sort to minimize consecutive matches for each player
+  const optimized = [];
+  const remaining = [...matches];
+  const lastPlayed = {};
+  players.forEach(p => lastPlayed[p.id] = -2);
+
+  while (remaining.length > 0) {
+    // Find a match where neither player played last round
+    let idx = remaining.findIndex(m =>
+      lastPlayed[m.p1.id] < optimized.length - 1 &&
+      lastPlayed[m.p2.id] < optimized.length - 1
+    );
+    if (idx === -1) idx = 0; // fallback
+    const [m] = remaining.splice(idx, 1);
+    lastPlayed[m.p1.id] = optimized.length;
+    lastPlayed[m.p2.id] = optimized.length;
+    optimized.push(m);
+  }
+  return optimized;
+}
+
+function genererPoules() {
+  const students = getStudents();
+  if (students.length < 3) { alert('Minimum 3 élèves requis.'); return; }
+  const size = parseInt(document.getElementById('poules-size').value);
+  const mode = document.getElementById('poules-repartition').value;
+  APP.poules.poules = repartirEnPoules(students, size, mode);
+  APP.poules.mode = mode;
+  APP.poules.ptsWin = parseInt(document.getElementById('poules-pts-win').value);
+  APP.poules.ptsLose = parseInt(document.getElementById('poules-pts-lose').value);
+  APP.poules.ptsSet = parseInt(document.getElementById('poules-pts-set').value);
+  APP.poules.type = document.getElementById('poules-type').value;
+  showPoulesAdjust();
+}
+
+function showPoulesAdjust() {
+  const el = document.getElementById('poules-adjust-content');
+  el.innerHTML = renderPoulesAdjustHTML(APP.poules.poules, 'poules');
+  document.getElementById('poules-adjust').style.display = '';
+  document.getElementById('poules-game').style.display = 'none';
+}
+
+function renderPoulesAdjustHTML(poules, prefix) {
+  return `<div class="poules-grid">` + poules.map((poule, pi) => `
+    <div class="poule-card">
+      <div class="poule-header">
+        Poule ${String.fromCharCode(65+pi)}
+        <button class="btn btn-xs btn-gray" onclick="addPlayerToPoule_${prefix}(${pi})">+ Élève</button>
+      </div>
+      <div class="poule-body" id="${prefix}-poule-body-${pi}">
+        ${poule.map((s,si) => `
+          <div class="poule-player">
+            <div class="poule-player-num">${si+1}</div>
+            <div style="flex:1">${s.prenom} ${s.nom}</div>
+            <button class="btn btn-xs btn-gray" onclick="removeFromPoule_${prefix}(${pi},${si})">✕</button>
+          </div>`).join('')}
+      </div>
+    </div>`).join('') + `</div>`;
+}
+
+// Poule adjust actions
+window.addPlayerToPoule_poules = function(pi) {
+  const unassigned = getStudents().filter(s => !APP.poules.poules.flat().find(p => p.id === s.id));
+  if (!unassigned.length) { alert('Tous les élèves sont assignés.'); return; }
+  showModal('Ajouter un élève', `<select id="modal-student-select" class="form-control" style="width:100%;padding:8px;border:1.5px solid var(--gray-200);border-radius:7px;">
+    ${unassigned.map(s => `<option value="${s.id}">${s.prenom} ${s.nom}</option>`).join('')}
+  </select>`, [
+    { label: 'Annuler', cls: 'btn-gray', fn: closeModal },
+    { label: 'Ajouter', cls: 'btn-primary', fn: () => {
+      const id = parseInt(document.getElementById('modal-student-select').value);
+      const s = getStudents().find(s => s.id == id);
+      APP.poules.poules[pi].push(s);
+      showPoulesAdjust();
+      closeModal();
+    }}
+  ]);
+};
+
+window.removeFromPoule_poules = function(pi, si) {
+  APP.poules.poules[pi].splice(si, 1);
+  if (!APP.poules.poules[pi].length) APP.poules.poules.splice(pi, 1);
+  showPoulesAdjust();
+};
+
+function regenPoules() {
+  const mode = document.getElementById('poules-repartition').value;
+  const size = parseInt(document.getElementById('poules-size').value);
+  APP.poules.poules = repartirEnPoules(getStudents(), size, mode);
+  showPoulesAdjust();
+}
+
+function confirmerPoules() {
+  // Generate matches per poule
+  APP.poules.matches = APP.poules.poules.map(poule => genMatchRotation(poule));
+  // Init scores
+  APP.poules.scores = {};
+  APP.poules.poules.forEach(poule => poule.forEach(s => {
+    APP.poules.scores[s.id] = { pts: 0, gagnés: 0, perdus: 0, ptsMark: 0, ptsConc: 0 };
+  }));
+  document.getElementById('poules-adjust').style.display = 'none';
+  document.getElementById('poules-game').style.display = '';
+  renderPoulesGame();
+}
+
+function renderPoulesGame() {
+  // Match list
+  const ml = document.getElementById('poules-matches-list');
+  let matchNum = 0;
+  ml.innerHTML = APP.poules.matches.map((pouleMatches, pi) =>
+    pouleMatches.map((m, mi) => {
+      matchNum++;
+      const played = m.played;
+      const scoreDisplay = played ? `<span class="badge ${m.s1>m.s2?'badge-green':'badge-red'}">${m.s1}-${m.s2}</span>` : '';
+      return `<div class="match-item">
+        <div class="match-num">${matchNum}</div>
+        <span class="badge badge-blue" style="font-size:10px;">Poule ${String.fromCharCode(65+pi)}</span>
+        <div class="match-players">
+          <span>${m.p1.prenom} ${m.p1.nom}</span>
+          <span class="match-vs">VS</span>
+          <span>${m.p2.prenom} ${m.p2.nom}</span>
+        </div>
+        ${scoreDisplay}
+        ${!played
+          ? `<div class="match-score">
+              <input type="number" id="pm-s1-${pi}-${mi}" value="0" min="0" style="width:50px">
+              <span class="score-sep">–</span>
+              <input type="number" id="pm-s2-${pi}-${mi}" value="0" min="0" style="width:50px">
+              <button class="btn btn-xs btn-success" onclick="savePoulesMatch(${pi},${mi})">✔</button>
+            </div>`
+          : `<button class="btn btn-xs btn-gray" onclick="undoPoulesMatch(${pi},${mi})">↩</button>`
+        }
+      </div>`;
+    }).join('')
+  ).join('');
+  document.getElementById('poules-match-count').textContent =
+    APP.poules.matches.flat().filter(m => m.played).length + '/' + APP.poules.matches.flat().length;
+
+  // Poule cards
+  const wrap = document.getElementById('poules-cards-wrap');
+  wrap.innerHTML = APP.poules.poules.map((poule, pi) => {
+    const standings = poule.map(s => ({ s, ...APP.poules.scores[s.id] }));
+    const sorted = sortByPoints(standings.map(st => ({...st, pts: st.pts||0, gagnés:st.gagnés||0, ptsMark:st.ptsMark||0, ptsConc:st.ptsConc||0})));
+    return `<div class="poule-card">
+      <div class="poule-header">Poule ${String.fromCharCode(65+pi)}<span>${poule.length} joueurs</span></div>
+      <div class="poule-body">
+        <table style="width:100%;font-size:12px;">
+          <tr><th>Pos.</th><th>Joueur</th><th>V</th><th>D</th><th>Pts</th></tr>
+          ${sorted.map((st,rank) => `<tr>
+            <td>${rank+1}</td>
+            <td>${st.s.prenom} ${st.s.nom}</td>
+            <td>${st.gagnés||0}</td>
+            <td>${st.perdus||0}</td>
+            <td><b>${st.pts||0}</b></td>
+          </tr>`).join('')}
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderPoulesClassement();
+}
+
+function savePoulesMatch(pi, mi) {
+  const m = APP.poules.matches[pi][mi];
+  const s1 = parseInt(document.getElementById(`pm-s1-${pi}-${mi}`).value) || 0;
+  const s2 = parseInt(document.getElementById(`pm-s2-${pi}-${mi}`).value) || 0;
+  m.s1 = s1; m.s2 = s2; m.played = true;
+  const sc = APP.poules.scores;
+  if (s1 > s2) {
+    sc[m.p1.id].pts += APP.poules.ptsWin; sc[m.p1.id].gagnés++;
+    sc[m.p2.id].pts += APP.poules.ptsLose; sc[m.p2.id].perdus++;
+  } else if (s2 > s1) {
+    sc[m.p2.id].pts += APP.poules.ptsWin; sc[m.p2.id].gagnés++;
+    sc[m.p1.id].pts += APP.poules.ptsLose; sc[m.p1.id].perdus++;
+  } else {
+    sc[m.p1.id].pts += 1; sc[m.p2.id].pts += 1;
+  }
+  sc[m.p1.id].ptsMark += s1; sc[m.p1.id].ptsConc += s2;
+  sc[m.p2.id].ptsMark += s2; sc[m.p2.id].ptsConc += s1;
+  renderPoulesGame();
+}
+
+function undoPoulesMatch(pi, mi) {
+  const m = APP.poules.matches[pi][mi];
+  const sc = APP.poules.scores;
+  const s1=m.s1, s2=m.s2;
+  if (s1 > s2) { sc[m.p1.id].pts -= APP.poules.ptsWin; sc[m.p1.id].gagnés--; sc[m.p2.id].pts -= APP.poules.ptsLose; sc[m.p2.id].perdus--; }
+  else if (s2 > s1) { sc[m.p2.id].pts -= APP.poules.ptsWin; sc[m.p2.id].gagnés--; sc[m.p1.id].pts -= APP.poules.ptsLose; sc[m.p1.id].perdus--; }
+  else { sc[m.p1.id].pts -= 1; sc[m.p2.id].pts -= 1; }
+  sc[m.p1.id].ptsMark -= s1; sc[m.p1.id].ptsConc -= s2;
+  sc[m.p2.id].ptsMark -= s2; sc[m.p2.id].ptsConc -= s1;
+  m.played = false; m.s1 = null; m.s2 = null;
+  renderPoulesGame();
+}
+
+function renderPoulesClassement() {
+  const el = document.getElementById('poules-classement');
+  el.innerHTML = APP.poules.poules.map((poule, pi) => {
+    const standings = poule.map(s => ({
+      s, pts: APP.poules.scores[s.id].pts||0,
+      gagnés: APP.poules.scores[s.id].gagnés||0,
+      perdus: APP.poules.scores[s.id].perdus||0,
+      ptsMark: APP.poules.scores[s.id].ptsMark||0,
+      ptsConc: APP.poules.scores[s.id].ptsConc||0
+    }));
+    const sorted = sortByPoints(standings);
+    return `<div style="margin-bottom:16px;">
+      <div style="font-weight:700;color:var(--blue);margin-bottom:6px;">Poule ${String.fromCharCode(65+pi)}</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Pos.</th><th>Joueur</th><th>V</th><th>D</th><th>Diff.</th><th>Pts</th></tr></thead>
+        <tbody>${sorted.map((st,r) => `<tr>
+          <td>${rankBadge(r+1)}</td>
+          <td>${st.s.prenom} ${st.s.nom}</td>
+          <td>${st.gagnés}</td><td>${st.perdus}</td>
+          <td>${st.ptsMark-st.ptsConc>=0?'+':''}${st.ptsMark-st.ptsConc}</td>
+          <td><b>${st.pts}</b></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  // Store for other modules
+  APP.poulesClassement = APP.poules.poules.map((poule, pi) => {
+    const standings = poule.map(s => ({ s, pts: APP.poules.scores[s.id].pts||0, gagnés: APP.poules.scores[s.id].gagnés||0 }));
+    return { poule: String.fromCharCode(65+pi), standings: sortByPoints(standings) };
+  });
+}
+
+function resetPoules() {
+  if (!confirm('Recommencer les Poules ?')) return;
+  APP.poules = { poules: [], matches: [], running: false };
+  document.getElementById('poules-config-card').style.display = '';
+  document.getElementById('poules-adjust').style.display = 'none';
+  document.getElementById('poules-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  DÉFI
+// ══════════════════════════════════════════════════════
+function startDefi() {
+  const students = getStudents();
+  if (students.length < 2) { alert('Minimum 2 élèves requis.'); return; }
+  const nbTableaux = parseInt(document.getElementById('defi-nb-tableaux').value);
+  const mode = document.getElementById('defi-repartition').value;
+  const capitalMax = parseInt(document.getElementById('defi-capital-max').value);
+  APP.defi.refus = document.getElementById('defi-refus').value === 'oui';
+  APP.defi.maxMatchs = parseInt(document.getElementById('defi-max-matchs').value);
+  APP.defi.ecartMin = parseInt(document.getElementById('defi-ecart-min').value);
+  APP.defi.ecartMax = parseInt(document.getElementById('defi-ecart-max').value);
+
+  let ordered;
+  if (mode === 'aleatoire') ordered = shuffle(students);
+  else if (mode === 'homogene') ordered = APP.peoClassement ? [...APP.peoClassement] : [...students];
+  else if (mode === 'heterogene') { const a = APP.peoClassement ? [...APP.peoClassement] : [...students]; ordered = a; }
+  else ordered = [...students];
+
+  APP.defi.tableaux = [];
+  if (nbTableaux === 1) {
+    APP.defi.tableaux.push({ players: ordered.map((s,i) => ({ ...s, pts: Math.round(capitalMax * (1 - i/ordered.length) + 100), matchsJoues: 0, history: [] })), history: [] });
+  } else {
+    const half = Math.ceil(ordered.length / 2);
+    const t1 = ordered.slice(0, half);
+    const t2 = ordered.slice(half);
+    APP.defi.tableaux.push({ players: t1.map((s,i) => ({ ...s, pts: Math.round(capitalMax * (1 - i/t1.length) + 100), matchsJoues: 0, history: [] })), history: [] });
+    APP.defi.tableaux.push({ players: t2.map((s,i) => ({ ...s, pts: Math.round(capitalMax * (1 - i/t2.length) + 100), matchsJoues: 0, history: [] })), history: [] });
+  }
+
+  document.getElementById('defi-config-card').style.display = 'none';
+  document.getElementById('defi-game').style.display = '';
+  if (nbTableaux === 2) {
+    document.getElementById('defi-tableau-2-card').style.display = '';
+    document.getElementById('defi-select-tableau').innerHTML = '<option value="1">Tableau 1</option><option value="2">Tableau 2</option>';
+  }
+  renderDefi();
+}
+
+function renderDefi() {
+  APP.defi.tableaux.forEach((t, ti) => {
+    const sorted = [...t.players].sort((a,b) => b.pts - a.pts);
+    const el = document.getElementById(`defi-classement-${ti+1}`);
+    if (!el) return;
+    el.innerHTML = sorted.map((p, i) => `
+      <div class="classement-row">
+        ${rankBadge(i+1)}
+        <div style="flex:1;font-weight:600;">${p.prenom} ${p.nom}</div>
+        <span class="badge badge-blue">${p.pts} pts</span>
+        <span class="badge badge-gray" style="font-size:10px;">${p.matchsJoues}/${APP.defi.maxMatchs} matchs</span>
+      </div>`).join('');
+  });
+
+  // Populate challenger/defenseur selects
+  const tabIdx = parseInt(document.getElementById('defi-select-tableau').value) - 1;
+  const t = APP.defi.tableaux[tabIdx];
+  const sorted = [...t.players].sort((a,b) => b.pts - a.pts);
+
+  const ch = document.getElementById('defi-challenger');
+  const df = document.getElementById('defi-defenseur');
+  const opts = sorted.map(p => `<option value="${p.id}">${p.prenom} ${p.nom} (${p.pts} pts)</option>`).join('');
+  ch.innerHTML = opts;
+  df.innerHTML = opts;
+
+  // Historique
+  const allHistory = APP.defi.tableaux.flatMap((t,ti) => t.history.map(h => ({...h, tableau: ti+1})));
+  const hel = document.getElementById('defi-historique');
+  hel.innerHTML = allHistory.length ? allHistory.slice(-20).reverse().map(h => `
+    <div class="match-item">
+      <span class="badge badge-blue" style="font-size:10px;">T${h.tableau}</span>
+      <div class="match-players">
+        <span style="color:var(--green);font-weight:700;">${h.winner} +${h.gainWin}</span>
+        <span class="match-vs">VS</span>
+        <span style="color:var(--red)">${h.loser} -${h.gainLose}</span>
+      </div>
+      <span style="font-size:11px;color:var(--gray-400);">${h.score}</span>
+      ${h.annulé ? '<span class="badge badge-red">Annulé</span>' : ''}
+      ${!h.annulé ? `<button class="btn btn-xs btn-gray" onclick="annulerDefi(${allHistory.indexOf(h)})">↩ Annuler</button>` : ''}
+    </div>`).join('') : '<p style="color:var(--gray-400);font-size:13px;">Aucun défi réalisé.</p>';
+}
+
+function proposeDefi() {
+  const tabIdx = parseInt(document.getElementById('defi-select-tableau').value) - 1;
+  const t = APP.defi.tableaux[tabIdx];
+  const chId = document.getElementById('defi-challenger').value;
+  const dfId = document.getElementById('defi-defenseur').value;
+  if (chId === dfId) { alert('Sélectionnez deux joueurs différents.'); return; }
+
+  const sorted = [...t.players].sort((a,b) => b.pts - a.pts);
+  const chRank = sorted.findIndex(p => p.id == chId);
+  const dfRank = sorted.findIndex(p => p.id == dfId);
+
+  if (chRank < dfRank) { alert('Le challenger doit avoir un rang inférieur (moins de points) que le défenseur.'); return; }
+
+  const ecart = chRank - dfRank;
+  if (ecart < APP.defi.ecartMin) { alert(`Écart minimum de ${APP.defi.ecartMin} rang(s) requis.`); return; }
+  if (ecart > APP.defi.ecartMax) { alert(`Écart maximum de ${APP.defi.ecartMax} rang(s) autorisé.`); return; }
+
+  const ch = t.players.find(p => p.id == chId);
+  const df = t.players.find(p => p.id == dfId);
+  if (ch.matchsJoues >= APP.defi.maxMatchs) { alert(`${ch.prenom} a atteint le maximum de défis.`); return; }
+
+  // Pending match
+  APP.defi.pending = { tabIdx, chId, dfId, ch, df };
+  document.getElementById('defi-pending').innerHTML = `
+    <div class="alert alert-warning">
+      ⚔️ Défi proposé : <b>${ch.prenom} ${ch.nom}</b> défie <b>${df.prenom} ${df.nom}</b><br>
+      <div class="match-score" style="margin-top:10px;">
+        <input type="number" id="defi-score-ch" value="0" min="0" style="width:55px">
+        <span class="score-sep">–</span>
+        <input type="number" id="defi-score-df" value="0" min="0" style="width:55px">
+      </div>
+      <div class="btn-group" style="margin-top:10px;">
+        <button class="btn btn-success btn-sm" onclick="validerDefi()">✅ Valider</button>
+        <button class="btn btn-gray btn-sm" onclick="APP.defi.pending=null;document.getElementById('defi-pending').innerHTML=''">✕ Annuler</button>
+      </div>
+    </div>`;
+}
+
+function validerDefi() {
+  if (!APP.defi.pending) return;
+  const { tabIdx, ch, df } = APP.defi.pending;
+  const t = APP.defi.tableaux[tabIdx];
+  const sCh = parseInt(document.getElementById('defi-score-ch').value) || 0;
+  const sDf = parseInt(document.getElementById('defi-score-df').value) || 0;
+  const winner = sCh > sDf ? ch : df;
+  const loser = sCh > sDf ? df : ch;
+  const gain = Math.round(Math.max(loser.pts * 0.1, 20));
+
+  winner.pts += gain;
+  loser.pts = Math.max(10, loser.pts - gain);
+  ch.matchsJoues++;
+  df.matchsJoues++;
+
+  t.history.push({
+    winner: `${winner.prenom} ${winner.nom}`,
+    loser: `${loser.prenom} ${loser.nom}`,
+    gainWin: gain, gainLose: gain,
+    score: `${sCh}-${sDf}`, annulé: false,
+    chId: ch.id, dfId: df.id, tabIdx
+  });
+
+  APP.defi.pending = null;
+  document.getElementById('defi-pending').innerHTML = '';
+  renderDefi();
+}
+
+function annulerDefi(idx) {
+  // Mark as annulé and reverse points
+  const allHistory = APP.defi.tableaux.flatMap((t,ti) => t.history.map(h => ({...h, tableau: ti+1})));
+  const h = allHistory[idx];
+  if (h.annulé) return;
+  // Reverse
+  const t = APP.defi.tableaux[h.tabIdx];
+  const winner = t.players.find(p => p.id == h.chId || `${t.players.find(pp=>pp.id==h.chId)?.prenom} ${t.players.find(pp=>pp.id==h.chId)?.nom}` === h.winner);
+  // Simple: mark annulé
+  h.annulé = true;
+  renderDefi();
+}
+
+function resetDefi() {
+  if (!confirm('Recommencer le Défi ?')) return;
+  APP.defi = { running: false, tableaux: [], pending: null };
+  document.getElementById('defi-config-card').style.display = '';
+  document.getElementById('defi-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  MATCH À THÈME
+// ══════════════════════════════════════════════════════
+document.getElementById('mt-pouvoir').addEventListener('change', function() {
+  document.getElementById('mt-custom-wrap').style.display = this.value === 'autre' ? '' : 'none';
+  updateTerrainDiagram();
+});
+
+function updateTerrainDiagram() {
+  const pouvoir = document.getElementById('mt-pouvoir').value;
+  const card = document.getElementById('mt-terrain-card');
+  const diag = document.getElementById('mt-terrain-diagram');
+  const expli = document.getElementById('mt-terrain-explication');
+  if (!pouvoir) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const terrains = {
+    lateral: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <rect x="10" y="10" width="35" height="280" fill="#fbbf24" opacity="0.45"/>
+        <rect x="135" y="10" width="35" height="280" fill="#fbbf24" opacity="0.45"/>
+        <text x="90" y="155" fill="#1a3a8f" font-size="9" font-weight="bold" text-anchor="middle">FILET</text>
+        <text x="27" y="155" fill="#92400e" font-size="9" font-weight="bold" text-anchor="middle" transform="rotate(-90,27,155)">LATÉRAL</text>
+        <text x="152" y="155" fill="#92400e" font-size="9" font-weight="bold" text-anchor="middle" transform="rotate(-90,152,155)">LATÉRAL</text>
+      </svg>`,
+      text: '🎯 <b>Espaces latéraux</b> : Les zones jaunes sur les côtés du terrain sont bonifiées. Tout point marqué dans ces zones rapporte un bonus.'
+    },
+    horizontal: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <rect x="10" y="130" width="160" height="40" fill="#93c5fd" opacity="0.7"/>
+        <rect x="10" y="10" width="160" height="30" fill="#fbbf24" opacity="0.5"/>
+        <rect x="10" y="260" width="160" height="30" fill="#fbbf24" opacity="0.5"/>
+        <text x="90" y="155" fill="#1a3a8f" font-size="9" font-weight="bold" text-anchor="middle">FILET / RIVIÈRE</text>
+        <text x="90" y="30" fill="#92400e" font-size="9" font-weight="bold" text-anchor="middle">FOND DE COUR</text>
+        <text x="90" y="278" fill="#92400e" font-size="9" font-weight="bold" text-anchor="middle">FOND DE COUR</text>
+      </svg>`,
+      text: '🎯 <b>Espaces horizontaux</b> : La rivière (zone centrale bleue) et le fond de cour (zones jaunes) sont bonifiés. Les volants arrivant dans ces zones rapportent un bonus.'
+    },
+    amorti: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <rect x="10" y="130" width="160" height="40" fill="#93c5fd" opacity="0.6"/>
+        <text x="90" y="155" fill="#1a3a8f" font-size="9" font-weight="bold" text-anchor="middle">RIVIÈRE (ZONE CIBLE)</text>
+        <path d="M120,80 Q100,120 80,145" stroke="#f97316" stroke-width="2.5" fill="none" stroke-dasharray="5,3"/>
+        <circle cx="80" cy="145" r="6" fill="#f97316"/>
+        <text x="130" y="75" fill="#f97316" font-size="10" font-weight="bold">AMORTI</text>
+        <text x="90" y="100" fill="#475569" font-size="8" text-anchor="middle">Frappe descendante</text>
+      </svg>`,
+      text: '🎯 <b>Amorti</b> : Frappe réalisée du mi-cour ou fond de cour, provoquant une trajectoire descendante du volant pour qu\'il arrive dans la rivière adverse.'
+    },
+    kill: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <rect x="10" y="130" width="160" height="40" fill="#93c5fd" opacity="0.6"/>
+        <text x="90" y="155" fill="#1a3a8f" font-size="9" font-weight="bold" text-anchor="middle">RIVIÈRE</text>
+        <rect x="10" y="125" width="160" height="15" fill="#fbbf24" opacity="0.4"/>
+        <text x="90" y="127" fill="#92400e" font-size="7" text-anchor="middle">Pied dans la rivière</text>
+        <path d="M90,125 Q90,135 90,145" stroke="#dc2626" stroke-width="3" fill="none"/>
+        <circle cx="90" cy="145" r="6" fill="#dc2626"/>
+        <text x="90" y="115" fill="#dc2626" font-size="10" font-weight="bold" text-anchor="middle">KILL !</text>
+      </svg>`,
+      text: '🎯 <b>Kill</b> : Frappe réalisée proche du filet (un pied dans la rivière), provoquant un volant descendant rapide.'
+    },
+    smash: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <path d="M80,50 L100,200" stroke="#dc2626" stroke-width="3.5" fill="none"/>
+        <circle cx="80" cy="50" r="7" fill="#dc2626"/>
+        <circle cx="100" cy="200" r="6" fill="#dc2626" opacity="0.5"/>
+        <text x="80" y="42" fill="#dc2626" font-size="11" font-weight="bold">SMASH!</text>
+        <text x="90" y="120" fill="#dc2626" font-size="8" text-anchor="middle" transform="rotate(-80,90,120)">Trajectoire rapide</text>
+      </svg>`,
+      text: '🎯 <b>Smash</b> : Frappe proche ou mi-cour provoquant un volant descendant à grande vitesse.'
+    },
+    'contre-amorti': {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <rect x="10" y="130" width="160" height="40" fill="#93c5fd" opacity="0.6"/>
+        <rect x="10" y="280" width="160" height="20" fill="#93c5fd" opacity="0.4"/>
+        <text x="90" y="295" fill="#1a3a8f" font-size="8" text-anchor="middle">Rivière adverse</text>
+        <path d="M80,135 Q90,142 110,145" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+        <circle cx="80" cy="135" r="5" fill="#7c3aed"/>
+        <text x="90" y="128" fill="#7c3aed" font-size="9" font-weight="bold" text-anchor="middle">CONTRE-AMORTI</text>
+      </svg>`,
+      text: '🎯 <b>Contre-amorti</b> : Frappe réalisée proche du filet (en réponse à un amorti), renvoyant le volant doucement pour qu\'il arrive dans la rivière adverse.'
+    },
+    bingo: {
+      svg: `<svg width="180" height="300" viewBox="0 0 180 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="160" height="280" fill="#e0f2fe" stroke="#1a3a8f" stroke-width="2.5" rx="4"/>
+        <line x1="10" y1="150" x2="170" y2="150" stroke="#1a3a8f" stroke-width="2"/>
+        <text x="90" y="100" fill="#f97316" font-size="32" font-weight="800" text-anchor="middle">BINGO!</text>
+        <text x="90" y="130" fill="#475569" font-size="10" text-anchor="middle">Annoncé avant le point</text>
+        <text x="90" y="200" fill="#475569" font-size="9" text-anchor="middle">1 Bingo par échange</text>
+        <text x="90" y="218" fill="#475569" font-size="9" text-anchor="middle">Point direct ou indirect</text>
+      </svg>`,
+      text: '🎯 <b>Bingo</b> : L\'élève annonce "BINGO !" avant de marquer un point (directement ou indirectement). Si le point n\'est pas concluant, l\'échange continue. Chaque élève dispose d\'un seul Bingo par échange.'
+    }
+  };
+
+  const t = terrains[pouvoir];
+  if (t) {
+    diag.innerHTML = t.svg;
+    expli.innerHTML = t.text;
+  } else {
+    const desc = document.getElementById('mt-custom-desc')?.value || 'Pouvoir moteur personnalisé';
+    diag.innerHTML = `<div class="pm-badge" style="font-size:16px;padding:12px 20px;">🎯 ${desc}</div>`;
+    expli.innerHTML = desc;
+  }
+}
+
+function startMatchTheme() {
+  const students = getStudents();
+  if (students.length < 2) { alert('Minimum 2 élèves requis.'); return; }
+  APP.mt.format = document.getElementById('mt-format').value;
+  APP.mt.pouvoir = document.getElementById('mt-pouvoir').value;
+  APP.mt.ptsBonus = parseInt(document.getElementById('mt-pts-bonus').value);
+  APP.mt.ptsSet = parseInt(document.getElementById('mt-pts-set').value);
+  APP.mt.scores = {};
+  APP.mt.bonus = {};
+  students.forEach(s => { APP.mt.scores[s.id] = { pts: 0, v: 0, d: 0 }; APP.mt.bonus[s.id] = 0; });
+
+  if (APP.mt.format === 'roundrobin') {
+    APP.mt.matches = generateRoundRobin(students);
+  } else {
+    const poules = repartirEnPoules(students, parseInt(document.getElementById('mt-poule-size').value), 'aleatoire');
+    APP.mt.matches = poules.flatMap(p => generateRoundRobin(p));
+    APP.mt.poules = poules;
+  }
+
+  updateTerrainDiagram();
+  document.getElementById('mt-config-card').style.display = 'none';
+  document.getElementById('mt-terrain-card').style.display = APP.mt.pouvoir ? '' : 'none';
+  document.getElementById('mt-game').style.display = '';
+  renderMT();
+}
+
+function renderMT() {
+  const pm = APP.mt.pouvoir;
+  const pmBadge = document.getElementById('mt-pm-badge');
+  if (pm) { pmBadge.style.display = ''; pmBadge.textContent = '🎯 ' + pm; }
+  else pmBadge.style.display = 'none';
+
+  const el = document.getElementById('mt-matches');
+  el.innerHTML = APP.mt.matches.map((m, i) => {
+    const played = m.played;
+    return `<div class="ligue-match-card">
+      <div class="ligue-match-header">
+        <span class="badge badge-blue">Match ${i+1}</span>
+        ${played ? '<span class="badge badge-green">Joué</span>' : '<span class="badge badge-gray">À jouer</span>'}
+        ${played ? `<button class="btn btn-xs btn-gray" onclick="undoMTMatch(${i})">↩</button>` : ''}
+      </div>
+      <div class="ligue-match-players">
+        <div class="ligue-player-name">${m.p1.prenom}<br><small>${m.p1.nom}</small></div>
+        ${played
+          ? `<div style="text-align:center"><span class="score-big">${m.s1}</span><span class="score-vs">–</span><span class="score-big">${m.s2}</span></div>`
+          : `<div class="match-score">
+              <input type="number" id="mt-s1-${i}" value="0" min="0" style="width:50px">
+              <span class="score-sep">–</span>
+              <input type="number" id="mt-s2-${i}" value="0" min="0" style="width:50px">
+              ${pm ? `<div style="margin-left:8px;font-size:11px;">
+                Bonus <br>
+                <input type="number" id="mt-b1-${i}" value="0" min="0" style="width:40px" placeholder="J1">
+                <input type="number" id="mt-b2-${i}" value="0" min="0" style="width:40px" placeholder="J2">
+              </div>` : ''}
+              <button class="btn btn-xs btn-success" onclick="saveMTMatch(${i})">✔</button>
+            </div>`
+        }
+        <div class="ligue-player-name">${m.p2.prenom}<br><small>${m.p2.nom}</small></div>
+      </div>
+    </div>`;
+  }).join('');
+  renderMTClassement();
+}
+
+function saveMTMatch(i) {
+  const m = APP.mt.matches[i];
+  m.s1 = parseInt(document.getElementById(`mt-s1-${i}`).value) || 0;
+  m.s2 = parseInt(document.getElementById(`mt-s2-${i}`).value) || 0;
+  m.b1 = parseInt(document.getElementById(`mt-b1-${i}`)?.value) || 0;
+  m.b2 = parseInt(document.getElementById(`mt-b2-${i}`)?.value) || 0;
+  m.played = true;
+  const sc = APP.mt.scores;
+  if (m.s1 > m.s2) { sc[m.p1.id].v++; sc[m.p2.id].d++; }
+  else if (m.s2 > m.s1) { sc[m.p2.id].v++; sc[m.p1.id].d++; }
+  sc[m.p1.id].pts += m.s1 + m.b1 * APP.mt.ptsBonus;
+  sc[m.p2.id].pts += m.s2 + m.b2 * APP.mt.ptsBonus;
+  APP.mt.bonus[m.p1.id] += m.b1;
+  APP.mt.bonus[m.p2.id] += m.b2;
+  renderMT();
+}
+
+function undoMTMatch(i) {
+  const m = APP.mt.matches[i];
+  const sc = APP.mt.scores;
+  if (m.s1 > m.s2) { sc[m.p1.id].v--; sc[m.p2.id].d--; }
+  else if (m.s2 > m.s1) { sc[m.p2.id].v--; sc[m.p1.id].d--; }
+  sc[m.p1.id].pts -= m.s1 + (m.b1||0) * APP.mt.ptsBonus;
+  sc[m.p2.id].pts -= m.s2 + (m.b2||0) * APP.mt.ptsBonus;
+  APP.mt.bonus[m.p1.id] -= m.b1||0;
+  APP.mt.bonus[m.p2.id] -= m.b2||0;
+  m.played = false;
+  renderMT();
+}
+
+function renderMTClassement() {
+  const students = getStudents();
+  const sorted = [...students].sort((a,b) =>
+    (APP.mt.scores[b.id].v - APP.mt.scores[a.id].v) ||
+    (APP.mt.scores[b.id].pts - APP.mt.scores[a.id].pts)
+  );
+  document.getElementById('mt-classement').innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Pos.</th><th>Joueur</th><th>V</th><th>D</th><th>Pts Jeu</th>${APP.mt.pouvoir?'<th>Bonus</th>':''}</tr></thead>
+      <tbody>${sorted.map((s,i) => `<tr>
+        <td>${rankBadge(i+1)}</td>
+        <td>${s.prenom} ${s.nom}</td>
+        <td>${APP.mt.scores[s.id].v}</td>
+        <td>${APP.mt.scores[s.id].d}</td>
+        <td><b>${APP.mt.scores[s.id].pts}</b></td>
+        ${APP.mt.pouvoir?`<td>${APP.mt.bonus[s.id]||0} 🎯</td>`:''}
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function resetMatchTheme() {
+  if (!confirm('Recommencer ?')) return;
+  APP.mt = { running: false, matches: [], scores: {}, bonus: {}, pouvoir: '' };
+  document.getElementById('mt-config-card').style.display = '';
+  document.getElementById('mt-terrain-card').style.display = 'none';
+  document.getElementById('mt-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  LIGUE INDIVIDUELLE
+// ══════════════════════════════════════════════════════
+document.getElementById('li-pts-system').addEventListener('change', function() {
+  const fixe = this.value === 'fixe';
+  document.getElementById('li-pts-fixe-wrap').style.display = fixe ? '' : 'none';
+  document.getElementById('li-pts-fixe-lose-wrap').style.display = fixe ? '' : 'none';
+});
+
+function startLigueInd() {
+  const students = getStudents();
+  if (students.length < 2) { alert('Minimum 2 élèves requis.'); return; }
+  const nb = parseInt(document.getElementById('li-nb-ligues').value);
+  const source = document.getElementById('li-source').value;
+  APP.li.ptsSet = parseInt(document.getElementById('li-pts-set').value);
+  APP.li.ptsSystem = document.getElementById('li-pts-system').value;
+  APP.li.ptsWin = parseInt(document.getElementById('li-pts-win').value) || 4;
+  APP.li.ptsLose = parseInt(document.getElementById('li-pts-lose').value) || 1;
+
+  let ordered;
+  if (source === 'peo' && APP.peoClassement) ordered = [...APP.peoClassement];
+  else if (source === 'aleatoire') ordered = shuffle(students);
+  else ordered = [...students];
+
+  APP.li.ligues = [];
+  const perLigue = Math.ceil(ordered.length / nb);
+  for (let i = 0; i < nb; i++) {
+    const players = ordered.slice(i * perLigue, (i+1) * perLigue);
+    APP.li.ligues.push({
+      name: nb > 1 ? `Ligue ${String.fromCharCode(65+i)}` : 'Ligue',
+      players,
+      scores: Object.fromEntries(players.map(p => [p.id, { pts: 0, v: 0, d: 0, ptsMark: 0, ptsConc: 0 }]))
+    });
+  }
+
+  APP.li.sessions = [{ date: new Date().toISOString().slice(0,10), matches: generateLIMatches(), pouvoir: '' }];
+  APP.li.currentSession = 0;
+
+  document.getElementById('li-config-wrap').style.display = 'none';
+  document.getElementById('li-game').style.display = '';
+  renderLITabs();
+}
+
+function generateLIMatches() {
+  return APP.li.ligues.map(ligue => ({
+    ligueName: ligue.name,
+    matches: generateRoundRobin(ligue.players)
+  }));
+}
+
+function renderLITabs() {
+  const tabBar = document.getElementById('li-tab-bar');
+  tabBar.innerHTML = APP.li.sessions.map((s, i) =>
+    `<button class="${i===APP.li.currentSession?'active':''}" onclick="switchLISession(${i},this)">
+      📅 ${formatDate(s.date)} ${s.pouvoir ? '🎯' : ''}
+    </button>`
+  ).join('');
+  renderLISession();
+}
+
+function switchLISession(i, btn) {
+  APP.li.currentSession = i;
+  document.querySelectorAll('#li-tab-bar button').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderLISession();
+}
+
+function renderLISession() {
+  const session = APP.li.sessions[APP.li.currentSession];
+  const el = document.getElementById('li-tab-content');
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">⚙️ Session du ${formatDate(session.date)}</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" value="${session.date}" onchange="APP.li.sessions[APP.li.currentSession].date=this.value;renderLITabs()">
+        </div>
+        <div class="form-group">
+          <label>Pouvoir moteur (bonus)</label>
+          <select onchange="APP.li.sessions[APP.li.currentSession].pouvoir=this.value;renderLISession()">
+            <option value="">Aucun</option>
+            <option value="lateral" ${session.pouvoir==='lateral'?'selected':''}>Espaces latéraux</option>
+            <option value="horizontal" ${session.pouvoir==='horizontal'?'selected':''}>Espaces horizontaux</option>
+            <option value="amorti" ${session.pouvoir==='amorti'?'selected':''}>Amorti</option>
+            <option value="kill" ${session.pouvoir==='kill'?'selected':''}>Kill</option>
+            <option value="smash" ${session.pouvoir==='smash'?'selected':''}>Smash</option>
+            <option value="bingo" ${session.pouvoir==='bingo'?'selected':''}>Bingo</option>
+            <option value="autre" ${session.pouvoir==='autre'?'selected':''}>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Points pour gagner le set</label>
+          <input type="number" value="${APP.li.ptsSet}" min="1" onchange="APP.li.ptsSet=parseInt(this.value)">
+        </div>
+      </div>
+    </div>
+    ${session.matches.map((ligueData, li) => renderLILigueMatches(ligueData, li, session)).join('')}
+    <div class="card">
+      <div class="card-title">🏆 Classement global</div>
+      ${APP.li.ligues.map(ligue => renderLIClassement(ligue)).join('')}
+    </div>`;
+}
+
+function renderLILigueMatches(ligueData, li, session) {
+  const ligue = APP.li.ligues[li];
+  return `<div class="card">
+    <div class="card-title">🏅 ${ligueData.ligueName} — Matchs</div>
+    ${ligueData.matches.map((m, mi) => {
+      const played = m.played;
+      const key = `li-${APP.li.currentSession}-${li}-${mi}`;
+      return `<div class="ligue-match-card">
+        <div class="ligue-match-header">
+          <span class="badge badge-blue">Match ${mi+1}</span>
+          ${played ? '<span class="badge badge-green">Joué</span>' : '<span class="badge badge-gray">À jouer</span>'}
+          ${played ? `<button class="btn btn-xs btn-gray" onclick="undoLIMatch(${li},${mi})">↩</button>` : ''}
+        </div>
+        <div class="ligue-match-players">
+          <div class="ligue-player-name">${m.p1.prenom}<br><small>${m.p1.nom}</small></div>
+          ${played
+            ? `<div style="text-align:center"><span class="score-big">${m.s1}</span><span class="score-vs">–</span><span class="score-big">${m.s2}</span></div>`
+            : `<div class="match-score">
+                <input type="number" id="${key}-s1" value="0" min="0" style="width:50px">
+                <span class="score-sep">–</span>
+                <input type="number" id="${key}-s2" value="0" min="0" style="width:50px">
+                <button class="btn btn-xs btn-success" onclick="saveLIMatch(${li},${mi},'${key}')">✔</button>
+              </div>`
+          }
+          <div class="ligue-player-name">${m.p2.prenom}<br><small>${m.p2.nom}</small></div>
+        </div>
+        ${played ? `<div style="text-align:center;margin-top:4px;font-size:11px;color:var(--gray-600);">${m.result||''}</div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function saveLIMatch(li, mi, key) {
+  const session = APP.li.sessions[APP.li.currentSession];
+  const m = session.matches[li].matches[mi];
+  const s1 = parseInt(document.getElementById(`${key}-s1`).value) || 0;
+  const s2 = parseInt(document.getElementById(`${key}-s2`).value) || 0;
+  m.s1 = s1; m.s2 = s2; m.played = true;
+
+  const ligue = APP.li.ligues[li];
+  const sc = ligue.scores;
+  const ecart = Math.abs(s1 - s2);
+  const seuilFacile = Math.round(APP.li.ptsSet * 3 / 11);
+
+  let pts1, pts2, result;
+  if (APP.li.ptsSystem === 'fixe') {
+    if (s1 > s2) { pts1 = APP.li.ptsWin; pts2 = APP.li.ptsLose; result = 'Victoire'; }
+    else { pts2 = APP.li.ptsWin; pts1 = APP.li.ptsLose; result = 'Défaite'; }
+  } else {
+    if (s1 > s2) {
+      if (ecart >= seuilFacile) { pts1 = 4; pts2 = 1; result = 'Victoire facile'; }
+      else { pts1 = 3; pts2 = 2; result = 'Victoire difficile'; }
+    } else {
+      if (ecart >= seuilFacile) { pts2 = 4; pts1 = 1; result = 'Défaite écartée'; }
+      else { pts2 = 3; pts1 = 2; result = 'Défaite difficile'; }
+    }
+  }
+  m.result = result;
+  sc[m.p1.id].pts += pts1; sc[m.p2.id].pts += pts2;
+  if (s1 > s2) { sc[m.p1.id].v++; sc[m.p2.id].d++; }
+  else { sc[m.p2.id].v++; sc[m.p1.id].d++; }
+  sc[m.p1.id].ptsMark += s1; sc[m.p1.id].ptsConc += s2;
+  sc[m.p2.id].ptsMark += s2; sc[m.p2.id].ptsConc += s1;
+  renderLISession();
+}
+
+function undoLIMatch(li, mi) {
+  const session = APP.li.sessions[APP.li.currentSession];
+  const m = session.matches[li].matches[mi];
+  const ligue = APP.li.ligues[li];
+  const sc = ligue.scores;
+  // Reverse - simplified (redo from scratch)
+  m.played = false; m.s1 = null; m.s2 = null; m.result = null;
+  // Recalculate scores from scratch
+  APP.li.ligues.forEach(l => {
+    l.players.forEach(p => { l.scores[p.id] = { pts: 0, v: 0, d: 0, ptsMark: 0, ptsConc: 0 }; });
+  });
+  APP.li.sessions.forEach(sess => {
+    sess.matches.forEach((ld, li2) => {
+      ld.matches.filter(mm => mm.played).forEach(mm => {
+        const l2 = APP.li.ligues[li2];
+        const s = l2.scores;
+        const ecart = Math.abs(mm.s1 - mm.s2);
+        const seuil = Math.round(APP.li.ptsSet * 3 / 11);
+        let pts1, pts2;
+        if (APP.li.ptsSystem === 'fixe') {
+          if (mm.s1 > mm.s2) { pts1 = APP.li.ptsWin; pts2 = APP.li.ptsLose; }
+          else { pts2 = APP.li.ptsWin; pts1 = APP.li.ptsLose; }
+        } else {
+          if (mm.s1 > mm.s2) { pts1 = ecart >= seuil ? 4 : 3; pts2 = ecart >= seuil ? 1 : 2; }
+          else { pts2 = ecart >= seuil ? 4 : 3; pts1 = ecart >= seuil ? 1 : 2; }
+        }
+        s[mm.p1.id].pts += pts1; s[mm.p2.id].pts += pts2;
+        if (mm.s1 > mm.s2) { s[mm.p1.id].v++; s[mm.p2.id].d++; } else { s[mm.p2.id].v++; s[mm.p1.id].d++; }
+        s[mm.p1.id].ptsMark += mm.s1; s[mm.p1.id].ptsConc += mm.s2;
+        s[mm.p2.id].ptsMark += mm.s2; s[mm.p2.id].ptsConc += mm.s1;
+      });
+    });
+  });
+  renderLISession();
+}
+
+function renderLIClassement(ligue) {
+  const sorted = [...ligue.players].sort((a,b) => {
+    const sa = ligue.scores[a.id], sb = ligue.scores[b.id];
+    return sb.pts - sa.pts || sb.v - sa.v;
+  });
+  return `<div style="margin-bottom:16px;">
+    <div style="font-weight:700;color:var(--blue);margin-bottom:6px;">${ligue.name}</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Pos.</th><th>Joueur</th><th>V</th><th>D</th><th>Diff.</th><th>Pts Ligue</th></tr></thead>
+      <tbody>${sorted.map((s,i) => {
+        const sc = ligue.scores[s.id];
+        return `<tr><td>${rankBadge(i+1)}</td><td>${s.prenom} ${s.nom}</td>
+          <td>${sc.v}</td><td>${sc.d}</td>
+          <td>${sc.ptsMark-sc.ptsConc>=0?'+':''}${sc.ptsMark-sc.ptsConc}</td>
+          <td><b>${sc.pts}</b></td></tr>`;
+      }).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function addLISession() {
+  APP.li.sessions.push({ date: new Date().toISOString().slice(0,10), matches: generateLIMatches(), pouvoir: '' });
+  APP.li.currentSession = APP.li.sessions.length - 1;
+  renderLITabs();
+}
+
+function openAddLISession() { addLISession(); }
+
+function resetLigueInd() {
+  if (!confirm('Recommencer la Ligue Individuelle ?')) return;
+  APP.li = { running: false, ligues: [], sessions: [], currentSession: 0 };
+  document.getElementById('li-config-wrap').style.display = '';
+  document.getElementById('li-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  LIGUE COLLECTIVE
+// ══════════════════════════════════════════════════════
+function startLigueCol() {
+  const students = getStudents();
+  if (students.length < 4) { alert('Minimum 4 élèves requis.'); return; }
+  APP.lc.format = parseInt(document.getElementById('lc-format').value);
+  APP.lc.ptsSet = parseInt(document.getElementById('lc-pts-set').value);
+  APP.lc.ordre = document.getElementById('lc-ordre').value;
+  APP.lc.egalite = document.getElementById('lc-egalite').value;
+
+  // Create pairs
+  const shuffled = shuffle(students);
+  APP.lc.binomes = [];
+  for (let i = 0; i < shuffled.length - 1; i += 2)
+    APP.lc.binomes.push({ j1: shuffled[i], j2: shuffled[i+1], id: i/2, pts: 0, v: 0, d: 0 });
+  if (shuffled.length % 2 !== 0) {
+    // Odd player: make trio
+    APP.lc.binomes[APP.lc.binomes.length-1].j3 = shuffled[shuffled.length-1];
+  }
+
+  // Generate matches
+  APP.lc.matches = generateRoundRobin(APP.lc.binomes);
+
+  document.getElementById('lc-config-card').style.display = 'none';
+  document.getElementById('lc-game').style.display = '';
+  renderLC();
+}
+
+function renderLC() {
+  // Binomes
+  document.getElementById('lc-binomes').innerHTML = `
+    <div class="poules-grid">
+      ${APP.lc.binomes.map((b,i) => `
+        <div class="poule-card">
+          <div class="poule-header">Binôme ${i+1}<span class="badge badge-orange">${b.pts} pts</span></div>
+          <div class="poule-body">
+            <div class="poule-player"><div class="poule-player-num">J1</div>${b.j1.prenom} ${b.j1.nom}</div>
+            <div class="poule-player"><div class="poule-player-num">J2</div>${b.j2.prenom} ${b.j2.nom}</div>
+            ${b.j3 ? `<div class="poule-player"><div class="poule-player-num">J3</div>${b.j3.prenom} ${b.j3.nom}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  // Matches
+  document.getElementById('lc-matches').innerHTML = APP.lc.matches.map((m, i) => {
+    const b1 = m.p1, b2 = m.p2;
+    const played = m.played;
+    return `<div class="ligue-match-card">
+      <div class="ligue-match-header">
+        <span class="badge badge-blue">Match ${i+1}</span>
+        ${played ? '<span class="badge badge-green">Joué</span>' : '<span class="badge badge-gray">À jouer</span>'}
+        ${played ? `<button class="btn btn-xs btn-gray" onclick="undoLCMatch(${i})">↩</button>` : ''}
+      </div>
+      <div style="font-size:12px;color:var(--gray-600);margin-bottom:8px;">
+        Format ${APP.lc.format} — ${APP.lc.ptsSet} pts pour gagner
+      </div>
+      <div class="ligue-match-players">
+        <div class="ligue-player-name">B${m.p1.id+1}<br><small>${b1.j1.prenom}/${b1.j2.prenom}</small></div>
+        ${played
+          ? `<div style="text-align:center">
+              ${APP.lc.format >= 2 ? `<div style="font-size:11px;color:var(--gray-500)">J1: ${m.s1j1}-${m.s2j1}</div>` : ''}
+              <span class="score-big">${m.s1}</span><span class="score-vs">–</span><span class="score-big">${m.s2}</span>
+            </div>`
+          : renderLCScoreInput(i, b1, b2)
+        }
+        <div class="ligue-player-name">B${m.p2.id+1}<br><small>${b2.j1.prenom}/${b2.j2.prenom}</small></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderLCClassement();
+}
+
+function renderLCScoreInput(i, b1, b2) {
+  if (APP.lc.format === 1) {
+    return `<div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+      <div style="font-size:10px;color:var(--gray-500)">J1 vs J1</div>
+      <div class="match-score">
+        <input type="number" id="lc-${i}-j1-s1" value="0" min="0" style="width:45px">
+        <span class="score-sep">–</span>
+        <input type="number" id="lc-${i}-j1-s2" value="0" min="0" style="width:45px">
+      </div>
+      <div style="font-size:10px;color:var(--gray-500)">J2 vs J2</div>
+      <div class="match-score">
+        <input type="number" id="lc-${i}-j2-s1" value="0" min="0" style="width:45px">
+        <span class="score-sep">–</span>
+        <input type="number" id="lc-${i}-j2-s2" value="0" min="0" style="width:45px">
+      </div>
+      <button class="btn btn-xs btn-success" onclick="saveLCMatch(${i})">✔ Valider</button>
+    </div>`;
+  } else {
+    return `<div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+      <div style="font-size:10px;color:var(--gray-500)">Score cumulé final</div>
+      <div class="match-score">
+        <input type="number" id="lc-${i}-s1" value="0" min="0" style="width:50px">
+        <span class="score-sep">–</span>
+        <input type="number" id="lc-${i}-s2" value="0" min="0" style="width:50px">
+      </div>
+      <button class="btn btn-xs btn-success" onclick="saveLCMatch(${i})">✔ Valider</button>
+    </div>`;
+  }
+}
+
+function saveLCMatch(i) {
+  const m = APP.lc.matches[i];
+  let s1, s2;
+  if (APP.lc.format === 1) {
+    const j1s1 = parseInt(document.getElementById(`lc-${i}-j1-s1`)?.value)||0;
+    const j1s2 = parseInt(document.getElementById(`lc-${i}-j1-s2`)?.value)||0;
+    const j2s1 = parseInt(document.getElementById(`lc-${i}-j2-s1`)?.value)||0;
+    const j2s2 = parseInt(document.getElementById(`lc-${i}-j2-s2`)?.value)||0;
+    m.s1j1 = j1s1; m.s2j1 = j1s2;
+    s1 = j1s1 + j2s1; s2 = j1s2 + j2s2;
+  } else {
+    s1 = parseInt(document.getElementById(`lc-${i}-s1`)?.value)||0;
+    s2 = parseInt(document.getElementById(`lc-${i}-s2`)?.value)||0;
+  }
+  m.s1 = s1; m.s2 = s2; m.played = true;
+  if (s1 > s2) { m.p1.v++; m.p2.d++; m.p1.pts += 3; m.p2.pts += 1; }
+  else if (s2 > s1) { m.p2.v++; m.p1.d++; m.p2.pts += 3; m.p1.pts += 1; }
+  else { m.p1.pts += 1; m.p2.pts += 1; }
+  renderLC();
+}
+
+function undoLCMatch(i) {
+  const m = APP.lc.matches[i];
+  if (m.s1 > m.s2) { m.p1.v--; m.p2.d--; m.p1.pts -= 3; m.p2.pts -= 1; }
+  else if (m.s2 > m.s1) { m.p2.v--; m.p1.d--; m.p2.pts -= 3; m.p1.pts -= 1; }
+  else { m.p1.pts -= 1; m.p2.pts -= 1; }
+  m.played = false;
+  renderLC();
+}
+
+function renderLCClassement() {
+  const sorted = [...APP.lc.binomes].sort((a,b) => b.pts - a.pts || b.v - a.v);
+  document.getElementById('lc-classement').innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Pos.</th><th>Binôme</th><th>Joueurs</th><th>V</th><th>D</th><th>Pts</th></tr></thead>
+      <tbody>${sorted.map((b,i) => `<tr>
+        <td>${rankBadge(i+1)}</td>
+        <td>B${b.id+1}</td>
+        <td>${b.j1.prenom}/${b.j2.prenom}</td>
+        <td>${b.v}</td><td>${b.d}</td><td><b>${b.pts}</b></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function resetLigueCol() {
+  if (!confirm('Recommencer ?')) return;
+  APP.lc = { running: false, binomes: [], matches: [] };
+  document.getElementById('lc-config-card').style.display = '';
+  document.getElementById('lc-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  TOURNOI
+// ══════════════════════════════════════════════════════
+window.addPlayerToPoule_tournoi = function(pi) {
+  const unassigned = getStudents().filter(s => !APP.tournoi.poules.flat().find(p => p.id === s.id));
+  if (!unassigned.length) { alert('Tous les élèves sont assignés.'); return; }
+  showModal('Ajouter un élève', `<select id="modal-student-select" style="width:100%;padding:8px;border:1.5px solid var(--gray-200);border-radius:7px;">
+    ${unassigned.map(s => `<option value="${s.id}">${s.prenom} ${s.nom}</option>`).join('')}
+  </select>`, [
+    { label: 'Annuler', cls: 'btn-gray', fn: closeModal },
+    { label: 'Ajouter', cls: 'btn-primary', fn: () => {
+      const id = parseInt(document.getElementById('modal-student-select').value);
+      const s = getStudents().find(s => s.id == id);
+      APP.tournoi.poules[pi].push(s);
+      showTournoiAdjust();
+      closeModal();
+    }}
+  ]);
+};
+
+window.removeFromPoule_tournoi = function(pi, si) {
+  APP.tournoi.poules[pi].splice(si, 1);
+  if (!APP.tournoi.poules[pi].length) APP.tournoi.poules.splice(pi, 1);
+  showTournoiAdjust();
+};
+
+function genererTournoi() {
+  const students = getStudents();
+  if (students.length < 4) { alert('Minimum 4 élèves requis.'); return; }
+  const size = parseInt(document.getElementById('tournoi-size').value);
+  const mode = document.getElementById('tournoi-repartition').value;
+  APP.tournoi.poules = repartirEnPoules(students, size, mode);
+  APP.tournoi.ptsSet = parseInt(document.getElementById('tournoi-pts-set').value);
+  APP.tournoi.ptsWin = parseInt(document.getElementById('tournoi-pts-win').value);
+  showTournoiAdjust();
+}
+
+function showTournoiAdjust() {
+  document.getElementById('tournoi-adjust').style.display = '';
+  document.getElementById('tournoi-poules-game').style.display = 'none';
+  document.getElementById('tournoi-adjust-content').innerHTML = renderPoulesAdjustHTML(APP.tournoi.poules, 'tournoi');
+}
+
+function regenTournoi() {
+  const mode = document.getElementById('tournoi-repartition').value;
+  const size = parseInt(document.getElementById('tournoi-size').value);
+  APP.tournoi.poules = repartirEnPoules(getStudents(), size, mode);
+  showTournoiAdjust();
+}
+
+function demarrerTournoi() {
+  APP.tournoi.matches = APP.tournoi.poules.map(poule => genMatchRotation(poule));
+  APP.tournoi.scores = {};
+  APP.tournoi.poules.forEach(poule => poule.forEach(s => {
+    APP.tournoi.scores[s.id] = { pts: 0, gagnés: 0, perdus: 0, ptsMark: 0, ptsConc: 0 };
+  }));
+  APP.tournoi.bracket = { principal: [], consolation: [] };
+  document.getElementById('tournoi-adjust').style.display = 'none';
+  document.getElementById('tournoi-poules-game').style.display = '';
+  renderTournoiGame();
+}
+
+function renderTournoiGame() {
+  // Same as Poules rendering
+  const ml = document.getElementById('tournoi-matches-list');
+  let matchNum = 0;
+  ml.innerHTML = APP.tournoi.matches.map((pouleMatches, pi) =>
+    pouleMatches.map((m, mi) => {
+      matchNum++;
+      const played = m.played;
+      return `<div class="match-item">
+        <div class="match-num">${matchNum}</div>
+        <span class="badge badge-blue" style="font-size:10px;">Poule ${String.fromCharCode(65+pi)}</span>
+        <div class="match-players">
+          <span>${m.p1.prenom} ${m.p1.nom}</span>
+          <span class="match-vs">VS</span>
+          <span>${m.p2.prenom} ${m.p2.nom}</span>
+        </div>
+        ${played ? `<span class="badge badge-green">${m.s1}-${m.s2}</span>` : ''}
+        ${!played
+          ? `<div class="match-score">
+              <input type="number" id="tm-s1-${pi}-${mi}" value="0" min="0" style="width:50px">
+              <span class="score-sep">–</span>
+              <input type="number" id="tm-s2-${pi}-${mi}" value="0" min="0" style="width:50px">
+              <button class="btn btn-xs btn-success" onclick="saveTournoiPouleMatch(${pi},${mi})">✔</button>
+            </div>`
+          : `<button class="btn btn-xs btn-gray" onclick="undoTournoiPouleMatch(${pi},${mi})">↩</button>`
+        }
+      </div>`;
+    }).join('')
+  ).join('');
+
+  // Poule cards
+  const wrap = document.getElementById('tournoi-poules-cards');
+  wrap.innerHTML = APP.tournoi.poules.map((poule, pi) => {
+    const standings = poule.map(s => ({ s, ...APP.tournoi.scores[s.id] }));
+    const sorted = sortByPoints(standings);
+    return `<div class="poule-card">
+      <div class="poule-header">Poule ${String.fromCharCode(65+pi)}</div>
+      <div class="poule-body">
+        <table style="width:100%;font-size:12px;">
+          <tr><th>Pos.</th><th>Joueur</th><th>V</th><th>D</th><th>Pts</th></tr>
+          ${sorted.map((st,r) => `<tr>
+            <td>${r+1}</td>
+            <td>${st.s.prenom} ${st.s.nom}</td>
+            <td>${st.gagnés||0}</td><td>${st.perdus||0}</td>
+            <td><b>${st.pts||0}</b></td>
+          </tr>`).join('')}
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveTournoiPouleMatch(pi, mi) {
+  const m = APP.tournoi.matches[pi][mi];
+  const s1 = parseInt(document.getElementById(`tm-s1-${pi}-${mi}`).value)||0;
+  const s2 = parseInt(document.getElementById(`tm-s2-${pi}-${mi}`).value)||0;
+  m.s1=s1; m.s2=s2; m.played=true;
+  const sc = APP.tournoi.scores;
+  if (s1>s2) { sc[m.p1.id].pts+=APP.tournoi.ptsWin; sc[m.p1.id].gagnés++; sc[m.p2.id].perdus++; }
+  else if (s2>s1) { sc[m.p2.id].pts+=APP.tournoi.ptsWin; sc[m.p2.id].gagnés++; sc[m.p1.id].perdus++; }
+  else { sc[m.p1.id].pts+=1; sc[m.p2.id].pts+=1; }
+  sc[m.p1.id].ptsMark+=s1; sc[m.p1.id].ptsConc+=s2;
+  sc[m.p2.id].ptsMark+=s2; sc[m.p2.id].ptsConc+=s1;
+  renderTournoiGame();
+}
+
+function undoTournoiPouleMatch(pi, mi) {
+  const m = APP.tournoi.matches[pi][mi];
+  const sc = APP.tournoi.scores;
+  if (m.s1>m.s2) { sc[m.p1.id].pts-=APP.tournoi.ptsWin; sc[m.p1.id].gagnés--; sc[m.p2.id].perdus--; }
+  else if (m.s2>m.s1) { sc[m.p2.id].pts-=APP.tournoi.ptsWin; sc[m.p2.id].gagnés--; sc[m.p1.id].perdus--; }
+  else { sc[m.p1.id].pts-=1; sc[m.p2.id].pts-=1; }
+  sc[m.p1.id].ptsMark-=m.s1; sc[m.p1.id].ptsConc-=m.s2;
+  sc[m.p2.id].ptsMark-=m.s2; sc[m.p2.id].ptsConc-=m.s1;
+  m.played=false;
+  renderTournoiGame();
+}
+
+function switchTournoiTab(tab, btn) {
+  document.querySelectorAll('#tournoi-tab-poules,#tournoi-tab-tableau,#tournoi-tab-classement').forEach(el => el.style.display='none');
+  document.getElementById(`tournoi-tab-${tab}`).style.display='';
+  document.querySelectorAll('#tournoi-poules-game .tab-bar button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+function genererTableau() {
+  // Get standings per poule, sorted
+  const poulesTournois = APP.tournoi.poules.map((poule, pi) => {
+    const standings = poule.map(s => ({
+      s, pts: APP.tournoi.scores[s.id].pts||0,
+      gagnés: APP.tournoi.scores[s.id].gagnés||0,
+      ptsMark: APP.tournoi.scores[s.id].ptsMark||0,
+      ptsConc: APP.tournoi.scores[s.id].ptsConc||0,
+      poule: pi
+    }));
+    return sortByPoints(standings);
+  });
+
+  // Build seeding: 1A vs last(B), 1B vs last(A), etc.
+  const maxPerPoule = Math.max(...poulesTournois.map(p => p.length));
+  const seeds = [];
+  for (let rank = 0; rank < maxPerPoule; rank++) {
+    poulesTournois.forEach(p => { if (p[rank]) seeds.push(p[rank]); });
+  }
+
+  // Build bracket (powers of 2)
+  const nbPlayers = seeds.length;
+  const bracketSize = Math.pow(2, Math.ceil(Math.log2(nbPlayers)));
+  APP.tournoi.seeds = seeds;
+  APP.tournoi.bracketSize = bracketSize;
+  APP.tournoi.bracketMatches = buildBracket(seeds, bracketSize);
+
+  switchTournoiTab('tableau', null);
+  renderBracket();
+}
+
+function buildBracket(seeds, size) {
+  // Create bracket slots
+  const slots = Array(size).fill(null).map((_, i) => seeds[i] ? seeds[i].s : null);
+  // Pair: 1 vs size, 2 vs size-1, etc. with seeding
+  const round1 = [];
+  for (let i = 0; i < size/2; i++) {
+    round1.push({ p1: slots[i], p2: slots[size-1-i], s1: null, s2: null, played: false, winner: null, bracket: 'principal' });
+  }
+  return { rounds: [round1], consolation: [] };
+}
+
+function renderBracket() {
+  const el = document.getElementById('bracket-principal');
+  const b = APP.tournoi.bracketMatches;
+  if (!b || !b.rounds[0]) return;
+
+  const round1 = b.rounds[0];
+  el.innerHTML = `<div class="bracket"><div class="bracket-round">
+    <div class="bracket-round-title">1er Tour</div>
+    ${round1.map((m, mi) => `
+      <div class="bracket-match">
+        <div class="bracket-slot ${m.winner?.id === m.p1?.id ? 'winner' : ''}">
+          <span class="slot-name">${m.p1 ? m.p1.prenom+' '+m.p1.nom : 'BYE'}</span>
+          ${m.played ? `<span class="slot-score">${m.s1}</span>` :
+            m.p1 && m.p2 ? `<div class="match-score" style="gap:4px">
+              <input type="number" id="br-${mi}-s1" value="0" min="0" style="width:42px;font-size:12px;">
+              <span style="font-size:12px">–</span>
+              <input type="number" id="br-${mi}-s2" value="0" min="0" style="width:42px;font-size:12px;">
+              <button class="btn btn-xs btn-success" onclick="saveBracketMatch(${mi})">✔</button>
+            </div>` : ''}
+        </div>
+        <div class="bracket-slot ${m.winner?.id === m.p2?.id ? 'winner' : ''}">
+          <span class="slot-name">${m.p2 ? m.p2.prenom+' '+m.p2.nom : 'BYE'}</span>
+          ${m.played ? `<span class="slot-score">${m.s2}</span>` : ''}
+        </div>
+      </div>`).join('')}
+  </div></div>`;
+
+  // Consolation
+  const cel = document.getElementById('bracket-consolation');
+  const losers = round1.filter(m => m.played && m.loser).map(m => m.loser);
+  if (losers.length > 0) {
+    cel.innerHTML = `<div class="bracket"><div class="bracket-round">
+      <div class="bracket-round-title">Consolation</div>
+      ${losers.map((l, i) => `<div class="bracket-match">
+        <div class="bracket-slot"><span class="slot-name">${l.prenom} ${l.nom}</span></div>
+        <div class="bracket-slot"><span class="slot-name">${losers[i+1] ? losers[i+1].prenom+' '+losers[i+1].nom : 'BYE'}</span></div>
+      </div>`).filter((_, i) => i % 2 === 0).join('')}
+    </div></div>`;
+  }
+
+  updateTournoiClassement();
+}
+
+function saveBracketMatch(mi) {
+  const m = APP.tournoi.bracketMatches.rounds[0][mi];
+  const s1 = parseInt(document.getElementById(`br-${mi}-s1`)?.value)||0;
+  const s2 = parseInt(document.getElementById(`br-${mi}-s2`)?.value)||0;
+  m.s1=s1; m.s2=s2; m.played=true;
+  m.winner = s1>s2 ? m.p1 : m.p2;
+  m.loser = s1>s2 ? m.p2 : m.p1;
+  renderBracket();
+}
+
+function updateTournoiClassement() {
+  const b = APP.tournoi.bracketMatches;
+  if (!b) return;
+  const all = getStudents();
+  const el = document.getElementById('tournoi-classement-general');
+  // Simple classement based on poule scores + bracket results
+  const scored = all.map(s => ({
+    s,
+    poulePts: APP.tournoi.scores[s.id]?.pts||0,
+    bracketWin: b.rounds[0]?.some(m => m.winner?.id === s.id) ? 1 : 0
+  })).sort((a,b) => b.bracketWin - a.bracketWin || b.poulePts - a.poulePts);
+
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Pos.</th><th>Joueur</th><th>Pts Poule</th><th>Phase finale</th></tr></thead>
+    <tbody>${scored.map((r,i) => `<tr>
+      <td>${rankBadge(i+1)}</td>
+      <td>${r.s.prenom} ${r.s.nom}</td>
+      <td>${r.poulePts}</td>
+      <td>${r.bracketWin ? '<span class="badge badge-green">Qualifié ✓</span>' : '<span class="badge badge-gray">—</span>'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function resetTournoi() {
+  if (!confirm('Recommencer le Tournoi ?')) return;
+  APP.tournoi = { running: false, poules: [], matches: [], bracket: {} };
+  document.getElementById('tournoi-config-card').style.display = '';
+  document.getElementById('tournoi-adjust').style.display = 'none';
+  document.getElementById('tournoi-poules-game').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  PDF EXPORTS (simplified using jsPDF)
+// ══════════════════════════════════════════════════════
+function buildPDFHeader(doc, title) {
+  doc.setFillColor(26, 58, 143);
+  doc.rect(0, 0, 210, 22, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text('UNSS – Gestion EPS', 10, 10);
+  doc.setFontSize(10);
+  doc.text(title, 10, 17);
+  const cfg = APP.config;
+  if (cfg.classe) doc.text(`Classe : ${cfg.classe}`, 140, 10);
+  if (cfg.date) doc.text(`Date : ${formatDate(cfg.date)}`, 140, 17);
+  doc.setTextColor(0,0,0);
+}
+
+function buildClassementTable(doc, rows, y) {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setFillColor(26, 58, 143);
+  doc.setTextColor(255, 255, 255);
+  doc.rect(10, y, 190, 7, 'F');
+  doc.text('Pos.', 13, y+5);
+  doc.text('Joueur', 35, y+5);
+  doc.text('V', 120, y+5);
+  doc.text('D', 135, y+5);
+  doc.text('Pts', 155, y+5);
+  doc.setTextColor(0,0,0);
+  doc.setFont('helvetica', 'normal');
+  y += 7;
+  rows.forEach((r, i) => {
+    doc.setFillColor(i%2===0?245:255, i%2===0?247:255, i%2===0?250:255);
+    doc.rect(10, y, 190, 7, 'F');
+    doc.text(String(i+1), 13, y+5);
+    doc.text(r.name.substring(0,30), 35, y+5);
+    doc.text(String(r.v||''), 120, y+5);
+    doc.text(String(r.d||''), 135, y+5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(r.pts), 155, y+5);
+    doc.setFont('helvetica', 'normal');
+    y += 7;
+  });
+  return y;
+}
+
+function exportPEOPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Partenaire en Or');
+  let y = 30;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+  doc.text('Classement', 10, y); y += 8;
+  const rows = (APP.peoClassement||[]).map(s => ({ name: `${s.prenom} ${s.nom}`, pts: s.pts }));
+  y = buildClassementTable(doc, rows, y);
+  y += 8;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+  doc.text('Résultats des matchs', 10, y); y += 8;
+  APP.peo.matches.forEach((m, i) => {
+    if (y > 270) { doc.addPage(); buildPDFHeader(doc, 'Partenaire en Or (suite)'); y = 30; }
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    const result = !m.played ? 'Non joué' : m.result ? '✓ Réussi' : '✗ Échec';
+    doc.text(`${i+1}. ${m.p1.prenom} ${m.p1.nom} vs ${m.p2.prenom} ${m.p2.nom} — ${result}`, 12, y);
+    y += 6;
+  });
+  doc.save('partenaire-en-or.pdf');
+}
+
+function exportPoulesPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Poules');
+  let y = 30;
+  APP.poules.poules.forEach((poule, pi) => {
+    const standings = poule.map(s => ({ s, ...APP.poules.scores[s.id] }));
+    const sorted = sortByPoints(standings.map(st => ({...st, pts:st.pts||0,gagnés:st.gagnés||0,perdus:st.perdus||0,ptsMark:st.ptsMark||0,ptsConc:st.ptsConc||0})));
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(`Poule ${String.fromCharCode(65+pi)}`, 10, y); y += 7;
+    const rows = sorted.map(st => ({ name: `${st.s.prenom} ${st.s.nom}`, v: st.gagnés, d: st.perdus, pts: st.pts }));
+    y = buildClassementTable(doc, rows, y);
+    y += 8;
+  });
+  doc.save('poules.pdf');
+}
+
+function exportDefiPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Défi');
+  let y = 30;
+  APP.defi.tableaux.forEach((t, ti) => {
+    const sorted = [...t.players].sort((a,b) => b.pts-a.pts);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(`Tableau ${ti+1}`, 10, y); y += 7;
+    const rows = sorted.map(p => ({ name: `${p.prenom} ${p.nom}`, pts: p.pts }));
+    y = buildClassementTable(doc, rows, y);
+    y += 8;
+  });
+  doc.save('defi.pdf');
+}
+
+function exportMTPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Match à Thème');
+  let y = 30;
+  if (APP.mt.pouvoir) {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+    doc.text(`Pouvoir moteur : ${APP.mt.pouvoir}`, 10, y); y += 8;
+  }
+  const students = getStudents();
+  const sorted = [...students].sort((a,b) => (APP.mt.scores[b.id]?.v||0)-(APP.mt.scores[a.id]?.v||0));
+  const rows = sorted.map(s => ({ name: `${s.prenom} ${s.nom}`, v: APP.mt.scores[s.id]?.v||0, d: APP.mt.scores[s.id]?.d||0, pts: APP.mt.scores[s.id]?.pts||0 }));
+  y = buildClassementTable(doc, rows, y);
+  doc.save('match-a-theme.pdf');
+}
+
+function exportLIGPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Ligue Individuelle');
+  let y = 30;
+  APP.li.ligues.forEach(ligue => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(ligue.name, 10, y); y += 7;
+    const sorted = [...ligue.players].sort((a,b) => (ligue.scores[b.id]?.pts||0)-(ligue.scores[a.id]?.pts||0));
+    const rows = sorted.map(s => ({ name: `${s.prenom} ${s.nom}`, v: ligue.scores[s.id]?.v||0, d: ligue.scores[s.id]?.d||0, pts: ligue.scores[s.id]?.pts||0 }));
+    y = buildClassementTable(doc, rows, y);
+    y += 8;
+  });
+  doc.save('ligue-individuelle.pdf');
+}
+
+function exportLCPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Ligue Collective');
+  let y = 30;
+  const sorted = [...APP.lc.binomes].sort((a,b) => b.pts-a.pts);
+  const rows = sorted.map(b => ({ name: `Binôme ${b.id+1} (${b.j1.prenom}/${b.j2.prenom})`, v: b.v, d: b.d, pts: b.pts }));
+  y = buildClassementTable(doc, rows, y);
+  doc.save('ligue-collective.pdf');
+}
+
+function exportTournoiPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Tournoi');
+  let y = 30;
+  APP.tournoi.poules.forEach((poule, pi) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(`Poule ${String.fromCharCode(65+pi)}`, 10, y); y += 7;
+    const standings = poule.map(s => ({ s, ...APP.tournoi.scores[s.id] }));
+    const sorted = sortByPoints(standings.map(st => ({...st,pts:st.pts||0,gagnés:st.gagnés||0,perdus:st.perdus||0,ptsMark:st.ptsMark||0,ptsConc:st.ptsConc||0})));
+    const rows = sorted.map(st => ({ name: `${st.s.prenom} ${st.s.nom}`, v: st.gagnés, d: st.perdus, pts: st.pts }));
+    y = buildClassementTable(doc, rows, y);
+    y += 8;
+  });
+  doc.save('tournoi.pdf');
+}
+
+function exportGlobalPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  buildPDFHeader(doc, 'Rapport Global EPS');
+  let y = 30;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+  doc.text('Rapport de séances EPS', 10, y); y += 8;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+  doc.text(`Classe : ${APP.config.classe||'—'}  |  Enseignant : ${APP.config.enseignant||'—'}`, 10, y); y += 7;
+  doc.text(`Sport : ${APP.config.sport||'Badminton'}  |  Date : ${formatDate(APP.config.date)||'—'}`, 10, y); y += 7;
+  doc.text(`Élèves inscrits : ${APP.students.length}`, 10, y); y += 10;
+
+  if (APP.peoClassement?.length) {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text('Partenaire en Or', 10, y); y += 7;
+    const rows = APP.peoClassement.slice(0,10).map(s => ({ name: `${s.prenom} ${s.nom}`, pts: s.pts }));
+    y = buildClassementTable(doc, rows, y);
+    y += 6;
+  }
+
+  doc.save('rapport-global-eps.pdf');
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+document.getElementById('cfg-date').value = new Date().toISOString().slice(0,10);
+document.getElementById('peo-date').value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
