@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collège Pasteur – Gestion EPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1a3a8f;--blue-dark:#122870;--blue-light:#2a52c9;--orange:#f97316;--orange-light:#fb923c;--white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-800:#1e293b;--green:#16a34a;--green-light:#dcfce7;--red:#dc2626;--red-light:#fee2e2;--yellow:#d97706;--yellow-light:#fef3c7;--purple:#7c3aed;--purple-light:#ede9fe;--radius:10px;--shadow:0 2px 12px rgba(26,58,143,.10);--shadow-lg:0 8px 32px rgba(26,58,143,.15)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh}
+header{background:var(--blue);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.logo{display:flex;flex-direction:column;line-height:1.1}
+.logo-text{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-text span{color:var(--orange)}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.65);font-weight:400;letter-spacing:.5px}
+nav{background:var(--blue-dark);display:flex;overflow-x:auto;padding:0 24px;gap:2px;border-bottom:3px solid var(--orange)}
+nav::-webkit-scrollbar{height:3px}
+nav button{background:none;border:none;color:rgba(255,255,255,.70);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;padding:14px 18px 11px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .18s}
+nav button:hover{color:#fff;background:rgba(255,255,255,.07)}
+nav button.active{color:#fff;font-weight:700;border-bottom:3px solid var(--orange)}
+main{padding:28px 24px;max-width:900px;margin:0 auto}
+.page-title{font-size:24px;font-weight:800;color:var(--blue);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+.page-title::before{content:'';display:block;width:5px;height:28px;background:var(--orange);border-radius:3px}
+.card{background:#fff;border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:18px}
+.card-title{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--gray-100);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.6px}
+input,select,textarea{font-family:'Outfit',sans-serif;font-size:14px;padding:9px 13px;border:1.5px solid var(--gray-200);border-radius:7px;background:#fff;color:var(--gray-800);transition:border-color .15s;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(42,82,201,.1)}
+textarea{resize:vertical}
+.btn{font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border:none;border-radius:7px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#15803d}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-gray{background:var(--gray-200);color:var(--gray-700)}.btn-gray:hover{background:var(--gray-300)}
+.btn-sm{padding:6px 12px;font-size:12px}.btn-xs{padding:4px 9px;font-size:11px}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-blue{background:#dbeafe;color:var(--blue)}.badge-green{background:var(--green-light);color:var(--green)}.badge-gray{background:var(--gray-200);color:var(--gray-600)}
+.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;border-left:4px solid}
+.alert-info{background:#dbeafe;border-color:var(--blue);color:var(--blue-dark)}
+.alert-warning{background:var(--yellow-light);border-color:var(--yellow);color:#92400e}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--gray-200)}
+.tab-bar button{background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--gray-400);padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-bar button.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.student-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;margin-top:10px}
+.chip{background:var(--blue);color:#fff;padding:5px 10px 5px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+.chip:hover{background:var(--blue-light)}
+.chip .chip-edit{cursor:pointer}
+.chip .chip-del{background:none;border:none;color:rgba(255,255,255,.65);cursor:pointer;font-size:14px;line-height:1;padding:0;display:flex;align-items:center;transition:color .1s}
+.chip .chip-del:hover{color:#fff}
+.chip-editing{background:var(--orange) !important;padding:0 !important;overflow:hidden}
+.chip-editing input{background:transparent;border:none;color:#fff;font-weight:600;font-size:12px;padding:5px 12px;width:150px;outline:none;box-shadow:none}
+.import-zone{border:2px dashed var(--gray-300);border-radius:8px;padding:14px 16px;background:var(--gray-50);transition:border-color .2s;margin-bottom:10px}
+.import-zone:focus-within{border-color:var(--blue-light);background:#fff}
+.import-zone label{font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:6px}
+.import-zone textarea{background:transparent;border:none;box-shadow:none;padding:0;font-size:13px;min-height:80px}
+.import-zone textarea:focus{border:none;box-shadow:none}
+.import-hint{font-size:11px;color:var(--gray-400);margin-top:4px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;color:var(--gray-400);font-size:13px;gap:4px;border:1.5px dashed var(--gray-200);border-radius:8px;min-height:72px;text-align:center}
+.empty-icon{font-size:28px;opacity:.4;margin-bottom:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-text">Collège <span>Pasteur</span></div>
+    <div class="logo-sub">Gestion EPS — Villemomble</div>
+  </div>
+</header>
+<nav>
+  <button class="active">🏠 Accueil</button>
+  <button>🤝 Partenaire en Or</button>
+  <button>⚽ Poules</button>
+  <button>⚔️ Défi</button>
+  <button>🎯 Match à Thème</button>
+  <button>↕️ Montante/Descendante</button>
+  <button>🏅 Ligue Indiv.</button>
+  <button>👥 Ligue Collective</button>
+  <button>🏆 Tournoi</button>
+</nav>
+<main>
+  <div class="page-title">Configuration de la Classe</div>
+
+  <div class="card">
+    <div class="card-title">📋 Informations générales</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Classe</label><input type="text" id="cfg-classe" placeholder="Ex: 3ème B"></div>
+      <div class="form-group"><label>Enseignant</label><input type="text" id="cfg-enseignant" placeholder="Nom"></div>
+      <div class="form-group"><label>Date</label><input type="date" id="cfg-date"></div>
+      <div class="form-group"><label>Sport</label><input type="text" id="cfg-sport" value="Badminton"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      👤 Liste des élèves
+      <span class="badge badge-blue" id="student-count">0 élève</span>
+      <span class="badge badge-gray" id="sort-badge" style="display:none">↑ A–Z</span>
+    </div>
+
+    <div class="alert alert-info">
+      Ces élèves sont partagés dans toutes les situations. <b>Cliquez sur un nom</b> pour le modifier, <b>✕</b> pour le supprimer.
+    </div>
+
+    <div class="tab-bar" id="stab-bar">
+      <button class="active" onclick="switchStab('stab-one', this)">✏️ Un élève</button>
+      <button onclick="switchStab('stab-bulk', this)">📋 Import en masse</button>
+      <button onclick="switchStab('stab-sample', this)">🎲 Exemples</button>
+    </div>
+
+    <!-- Tab 1 : saisie individuelle -->
+    <div class="tab-pane active" id="stab-one">
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;min-width:110px">
+          <label>Prénom</label>
+          <input type="text" id="s-prenom" placeholder="Prénom" autocomplete="off"
+            onkeydown="if(event.key==='Enter')document.getElementById('s-nom').focus()">
+        </div>
+        <div class="form-group" style="flex:1;min-width:110px">
+          <label>Nom</label>
+          <input type="text" id="s-nom" placeholder="Nom (optionnel)" autocomplete="off"
+            onkeydown="if(event.key==='Enter')addStudent()">
+        </div>
+        <button class="btn btn-primary" onclick="addStudent()" style="align-self:flex-end;flex-shrink:0">
+          + Ajouter
+        </button>
+      </div>
+      <div id="dup-alert" class="alert alert-warning" style="display:none;margin-top:8px;margin-bottom:0">
+        ⚠️ Cet élève est déjà dans la liste.
+      </div>
+    </div>
+
+    <!-- Tab 2 : import en masse -->
+    <div class="tab-pane" id="stab-bulk">
+      <div class="import-zone">
+        <label>Collez votre liste — un élève par ligne, format « Prénom Nom » ou « Prénom »</label>
+        <textarea id="bulk-input" placeholder="Alice Martin&#10;Baptiste Durand&#10;Chloé Bernard&#10;..."></textarea>
+        <div class="import-hint">Les doublons et lignes vides sont ignorés automatiquement.</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="importBulk()">📥 Importer</button>
+        <button class="btn btn-gray btn-sm" onclick="document.getElementById('bulk-input').value=''">Effacer</button>
+        <span id="bulk-feedback" style="font-size:12px;color:var(--green);font-weight:600;display:none">
+          ✅ <span id="bulk-count">0</span> élève(s) ajouté(s)
+        </span>
+      </div>
+    </div>
+
+    <!-- Tab 3 : exemples -->
+    <div class="tab-pane" id="stab-sample">
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:10px">
+        Chargez une liste d'exemple pour tester l'application.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-gray btn-sm" onclick="importSample(12)">🎲 12 élèves</button>
+        <button class="btn btn-gray btn-sm" onclick="importSample(16)">🎲 16 élèves</button>
+        <button class="btn btn-gray btn-sm" onclick="importSample(24)">🎲 24 élèves</button>
+      </div>
+    </div>
+
+    <!-- Chips -->
+    <div class="student-chips" id="student-list"></div>
+
+    <!-- Barre d'outils (masquée si vide) -->
+    <div class="toolbar" id="chips-toolbar" style="display:none">
+      <button class="btn btn-sm btn-gray" onclick="sortStudents()">⇅ Trier A–Z</button>
+      <button class="btn btn-sm btn-gray" onclick="shuffleStudents()">🔀 Mélanger</button>
+      <button class="btn btn-sm btn-danger" onclick="clearStudents()">🗑️ Tout supprimer</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── State ──
+let students = [];
+let editingId = null;
+
+const SAMPLE = [
+  ['Alice','Martin'],['Baptiste','Durand'],['Chloé','Bernard'],['Dylan','Thomas'],
+  ['Emma','Robert'],['Florian','Petit'],['Gabrielle','Richard'],['Hugo','Simon'],
+  ['Inès','Laurent'],['Jules','Michel'],['Lena','Lefevre'],['Maxime','Moreau'],
+  ['Nadia','Dupont'],['Oscar','Fontaine'],['Pauline','Legrand'],['Quentin','Rousseau'],
+  ['Romy','Girard'],['Samuel','Bertrand'],['Tina','Leclerc'],['Ugo','Perrin'],
+  ['Vanessa','Bonnet'],['William','Morel'],['Xena','Garnier'],['Yann','Chevalier']
+];
+
+function sName(s) { return s.prenom + (s.nom ? ' ' + s.nom : ''); }
+
+// ── Tab switching ──
+function switchStab(tabId, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#stab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Add single student ──
+function addStudent() {
+  const prenom = document.getElementById('s-prenom').value.trim();
+  const nom    = document.getElementById('s-nom').value.trim();
+  if (!prenom) return;
+
+  const dupAlert = document.getElementById('dup-alert');
+  const isDup = students.some(s =>
+    s.prenom.toLowerCase() === prenom.toLowerCase() &&
+    s.nom.toLowerCase() === nom.toLowerCase()
+  );
+  if (isDup) {
+    dupAlert.style.display = '';
+    setTimeout(() => dupAlert.style.display = 'none', 3000);
+    return;
+  }
+  dupAlert.style.display = 'none';
+  students.push({ id: Date.now() + Math.random(), prenom, nom });
+  document.getElementById('s-prenom').value = '';
+  document.getElementById('s-nom').value = '';
+  document.getElementById('s-prenom').focus();
+  render();
+}
+
+// ── Bulk import ──
+function importBulk() {
+  const raw = (document.getElementById('bulk-input').value || '').trim();
+  if (!raw) return;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  let added = 0;
+  lines.forEach(line => {
+    const parts = line.split(/\s+/);
+    const prenom = parts[0] || '';
+    const nom = parts.slice(1).join(' ');
+    if (!prenom) return;
+    const dup = students.some(s =>
+      s.prenom.toLowerCase() === prenom.toLowerCase() &&
+      s.nom.toLowerCase() === nom.toLowerCase()
+    );
+    if (!dup) {
+      students.push({ id: Date.now() + Math.random(), prenom, nom });
+      added++;
+    }
+  });
+  document.getElementById('bulk-count').textContent = added;
+  const fb = document.getElementById('bulk-feedback');
+  fb.style.display = '';
+  setTimeout(() => fb.style.display = 'none', 3500);
+  render();
+}
+
+// ── Sample import ──
+function importSample(n) {
+  students = SAMPLE.slice(0, n).map(([prenom, nom], i) => ({ id: i + 1, prenom, nom }));
+  document.getElementById('sort-badge').style.display = 'none';
+  render();
+}
+
+// ── Remove ──
+function removeStudent(id) {
+  students = students.filter(s => s.id !== id);
+  render();
+}
+
+// ── Edit ──
+function startEdit(id) {
+  editingId = id;
+  render();
+  const inp = document.getElementById('edit-' + id);
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+function confirmEdit(id) {
+  const inp = document.getElementById('edit-' + id);
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (val) {
+    const parts = val.split(/\s+/);
+    const s = students.find(s => s.id === id);
+    if (s) { s.prenom = parts[0]; s.nom = parts.slice(1).join(' '); }
+  }
+  editingId = null;
+  render();
+}
+
+// ── Sort / Shuffle / Clear ──
+function sortStudents() {
+  students.sort((a, b) => sName(a).localeCompare(sName(b), 'fr'));
+  document.getElementById('sort-badge').style.display = '';
+  render();
+}
+
+function shuffleStudents() {
+  for (let i = students.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [students[i], students[j]] = [students[j], students[i]];
+  }
+  document.getElementById('sort-badge').style.display = 'none';
+  render();
+}
+
+function clearStudents() {
+  if (!confirm('Supprimer tous les élèves ?')) return;
+  students = [];
+  editingId = null;
+  document.getElementById('sort-badge').style.display = 'none';
+  render();
+}
+
+// ── Render ──
+function render() {
+  const list    = document.getElementById('student-list');
+  const toolbar = document.getElementById('chips-toolbar');
+  const count   = students.length;
+
+  document.getElementById('student-count').textContent =
+    count + ' élève' + (count > 1 ? 's' : '');
+
+  toolbar.style.display = count ? 'flex' : 'none';
+
+  if (!count) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <div>Aucun élève — ajoutez-en ci-dessus</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = students.map(s => {
+    if (editingId === s.id) {
+      return `
+        <span class="chip chip-editing">
+          <input id="edit-${s.id}" type="text" value="${sName(s).replace(/"/g,'&quot;')}"
+            onblur="confirmEdit(${s.id})"
+            onkeydown="if(event.key==='Enter')confirmEdit(${s.id});
+                       if(event.key==='Escape'){editingId=null;render();}">
+        </span>`;
+    }
+    return `
+      <span class="chip" title="Cliquer pour modifier">
+        <span class="chip-edit" onclick="startEdit(${s.id})">${sName(s)}</span>
+        <button class="chip-del" onclick="removeStudent(${s.id})" title="Supprimer">✕</button>
+      </span>`;
+  }).join('');
+}
+
+// ── Init ──
+document.getElementById('cfg-date').value = new Date().toISOString().slice(0, 10);
+render();
+</script>
+</body>
+</html>
